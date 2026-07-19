@@ -1,0 +1,10 @@
+allowBuilds:
+  '@logicflow/core': false
+  '@parcel/watcher': false
+  '@vue-office/docx': false
+  '@vue-office/excel': false
+  '@vue-office/pdf': false
+  core-js-pure: false
+  es5-ext: false
+  vue-demi: false
+  yorkie: false

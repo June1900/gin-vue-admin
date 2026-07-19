@@ -4,6 +4,9 @@ package initialize
 import (
 	"context"
 	"encoding/json"
+	"time"
+
+	"go.uber.org/zap"
 
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	mediaService "github.com/flipped-aurora/gin-vue-admin/server/service/media"
@@ -21,5 +24,12 @@ func Timer() {
 	task.Register("CleanStaleUploads", "清理过期大文件上传会话", func(ctx context.Context, _ json.RawMessage) error {
 		svc := mediaService.MediaUploadService{}
 		return svc.CleanupStale(ctx, global.GVA_CONFIG.Media.SessionTTL)
+	})
+	task.Register("DemoLogTask", "示例任务: 仅打印日志(用于验证定时任务调度链路)", func(ctx context.Context, params json.RawMessage) error {
+		global.GVA_LOG.Info("DemoLogTask 执行",
+			zap.Time("ts", time.Now()),
+			zap.String("params", string(params)),
+		)
+		return nil
 	})
 }
