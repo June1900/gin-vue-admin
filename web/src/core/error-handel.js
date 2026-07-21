@@ -8,17 +8,17 @@ function sendErrorTip(errorInfo) {
       level: 'error',
       solution: null
     }
-    
+
     createSysError(errorData).catch(apiErr => {
       console.error('Failed to create error record:', apiErr)
     })
   }, 0)
 }
-  
-  window.addEventListener('unhandledrejection', (event) => {
+
+window.addEventListener('unhandledrejection', (event) => {
     sendErrorTip({
       type: '前端',
       message: `错误信息: ${event.reason}`,
       stack: `调用栈: ${event.reason?.stack || '没有调用栈信息'}`,
     });
-  });
+});
