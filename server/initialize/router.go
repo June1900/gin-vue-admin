@@ -42,6 +42,9 @@ func Routers() *gin.Engine {
 	Router.Use(middleware.GinRecovery(true))
 	// 全局访问日志 + 唯一 body/resp 捕获点（供 OperationRecord 复用）
 	Router.Use(middleware.AccessLog())
+	// API 加解密过滤器 (非侵入式,默认关闭;启用时按配置/注解自动加解密)
+	// 顺序: 必须放在最外层 (在 JSON 解析之前), 让 body 提前还原为明文
+	Router.Use(middleware.CryptoFilter())
 	if gin.Mode() == gin.DebugMode {
 		Router.Use(gin.Logger())
 	}

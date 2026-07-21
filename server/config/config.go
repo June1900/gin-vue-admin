@@ -40,6 +40,9 @@ type Server struct {
 	// MCP配置
 	MCP MCP `mapstructure:"mcp" json:"mcp" yaml:"mcp"`
 
+	// API 加解密过滤器配置
+	APIDecrypt APIDecrypt `mapstructure:"api-decrypt" json:"api-decrypt" yaml:"api-decrypt"`
+
 	// 应用身份（日志静态字段 node/app_id/env）
 	App App `mapstructure:"app" json:"app" yaml:"app"`
 }

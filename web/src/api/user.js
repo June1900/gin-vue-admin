@@ -7,7 +7,8 @@ export const login = (data) => {
   return service({
     url: '/base/login',
     method: 'post',
-    data: data
+    data: data,
+    isEncrypt: true // 登录请求加密: 后端 CryptoFilter 会按 always-encrypt-paths 自动处理
   })
 }
 
@@ -18,7 +19,8 @@ export const login = (data) => {
 export const captcha = () => {
   return service({
     url: '/base/captcha',
-    method: 'post'
+    method: 'post',
+    isEncrypt: true
   })
 }
 
@@ -30,7 +32,8 @@ export const register = (data) => {
   return service({
     url: '/user/admin_register',
     method: 'post',
-    data: data
+    data: data,
+    isEncrypt: true
   })
 }
 
@@ -42,7 +45,8 @@ export const changePassword = (data) => {
   return service({
     url: '/user/changePassword',
     method: 'post',
-    data: data
+    data: data,
+    isEncrypt: true
   })
 }
 

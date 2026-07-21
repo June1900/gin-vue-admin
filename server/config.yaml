@@ -1,5 +1,3 @@
-# github.com/flipped-aurora/gin-vue-admin/server Global Configuration
-
 # jwt configuration
 jwt:
     signing-key: qmPlus
@@ -22,8 +20,8 @@ zap:
     access-req-headers: true
     access-log-max-bytes: 1024
     file-only-modules:
-      - http
-      - sql
+        - http
+        - sql
 
 # redis configuration
 redis:
@@ -81,7 +79,7 @@ email:
 system:
     env: local # 修改为public可以关闭路由日志输出
     addr: 8888
-    db-type: mysql
+    db-type: pgsql
     oss-type: local # 控制oss选择走本地还是 七牛等其他仓 自行增加其他oss仓可以在 server/utils/upload/upload.go 中 NewOss函数配置
     use-redis: false # 使用redis
     use-mongo: false     # 使用mongo
@@ -123,15 +121,17 @@ mysql:
 # pgsql connect configuration
 # 未初始化之前请勿手动修改数据库信息！！！如果一定要手动初始化请看（https://gin-vue-admin.com/docs/first_master）
 pgsql:
-    path: ""
-    port: ""
-    config: ""
-    db-name: ""
-    username: ""
-    password: ""
+    prefix: ""
+    path: "localhost"
+    port: "5432"
+    config: "sslmode=disable TimeZone=Asia/Shanghai"
+    db-name: "gva_v3"
+    username: "root"
+    password: "QAZplm@09oyui"
     max-idle-conns: 10
     max-open-conns: 100
     conn-max-lifetime: 0
+    singular: false
     log-mode: ""
     log-zap: false
 oracle:
@@ -294,3 +294,57 @@ mcp:
     version: v1.0.0
     addr: 8889
     separate: false
+
+# API 加解密过滤器（非侵入式）
+# 启用后:
+#   - 入站: 读取 header-flag 请求头中的 RSA 加密 AES key,私钥解出后解密请求体
+#   - 出站: 生成新 AES key 加密响应体,公钥加密 AES key 写入 header-flag 响应头
+# 优先支持登录: 将登录/验证码路径加入 always-encrypt-paths 即默认加密
+# 使用前请用 server/utils/cryptox/keygen 工具生成 RSA 密钥对填入下方
+api-decrypt:
+    enabled: true
+    header-flag: encrypt-key
+    public-key: |
+        -----BEGIN PUBLIC KEY-----
+        MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA0iH5fmphWWCEpAoX5wtV
+        hCKGmztVZowDjc3IePalpmRieu8RKzwU/kq70mZTRW7XSjzlT87UMnRw74f7Xjaj
+        sl8/B2DuLh6XLY+eoDVGscRwtNi+BmUeVdqNibCVoVheGdlgtBpotCjhejgRNOjL
+        ST/6+M2yxhj8y/MfkLPj9rlqiTgAWpEgWqu/cwPEMgf+O548lQzChOZJAt9slNoZ
+        OcfGKMqrelnWzDp2JlC3k0Mc1cHDju9eG9uaPejnDH8u8u9Qm5sa3bRN69AE+vFt
+        rIlzbQvKwMNme4kubObhaLydpzaa6nvn15vPXwat6l5Bq4tRgSZJYIfRu1DXEIwt
+        DQIDAQAB
+        -----END PUBLIC KEY-----
+    private-key: |
+        -----BEGIN PRIVATE KEY-----
+        MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDSIfl+amFZYISk
+        ChfnC1WEIoabO1VmjAONzch49qWmZGJ67xErPBT+SrvSZlNFbtdKPOVPztQydHDv
+        h/teNqOyXz8HYO4uHpctj56gNUaxxHC02L4GZR5V2o2JsJWhWF4Z2WC0Gmi0KOF6
+        OBE06MtJP/r4zbLGGPzL8x+Qs+P2uWqJOABakSBaq79zA8QyB/47njyVDMKE5kkC
+        32yU2hk5x8Yoyqt6WdbMOnYmULeTQxzVwcOO714b25o96OcMfy7y71CbmxrdtE3r
+        0AT68W2siXNtC8rAw2Z7iS5s5uFovJ2nNprqe+fXm89fBq3qXkGri1GBJklgh9G7
+        UNcQjC0NAgMBAAECggEADKkAW6X0JIrkou96vjBYICRmYL7j59BCvI3r6KHPnCVL
+        K6Xwrl6p0yJUi5ofpTzG2tGtbTAEZ9/NGBlkwynelfYYGY00/HFaYWPYRkW/cyFn
+        OvYeCMuZ1slaorORaE2nKb6HjYJT0Zru7sqm+r2V1d11dP0LqtTBklYdDj5QW0J3
+        knwNhZuVIc/t6jnDqjHuaG0RZ92N06X6B+lFNEwtomWZsNMLe3UtT/fPkoRtXb5/
+        nMBkwJ8MpU1ablIpTtjw6YnK+Wc65B4zDobcYC5nc953Js69GALdmVQnaO63pStA
+        ObwwfIcbnu6Z9K9gvvcVX+X2lreHLLDjyGVVOqbEjwKBgQDa16yod2uCEAYLC4Qw
+        h9GRAqmJFikJ+R152AjiPOTXZEULiUQJQRCyWKhKJovY7dSXIOyhl0nFhcbUgmAt
+        xMje/DbzMM8tLGVX+hATL20fsv7t01e+aFLe9smFHM5yzPp+tUsbQx6uPwS5pCP8
+        SNQGH+NcvmzYG/jAGR1zt5Ti+wKBgQD1z7d+z2Xi7Q3pbdcs+CNC5QdibJOKTkTb
+        4djVpQ3dygUKiW81XbZnYkjXVggcY+R/mH/XoiSGcTCzeGRHPDhi7eOseG5aVUUH
+        mN3fP+CF+WqvykWLNfuHJjxSuHBPfsBgjwUgXXJJYXdbBRE3n0gk2sPV/CDDfxm4
+        PYmLnGTxlwKBgQC6vvLaa9W1DmFpyXELTMs7eE8d6Wgp14gcsoqaLKaHW0xEFOWX
+        FAvgdSFe7VfHTORt9q2XExfj002hiIP0aomTJxzpF8yjWtA8a+qNxJnVRBSg9Alb
+        NYEKPQQocDWH530W5TPrVrJ2tNYeaIBAyBEODOYi/Wi6Xdw+aPAmEBGgQwKBgCJ2
+        MJ+SrBIYce7b+2LOlwL14QcnebfWKUk6bI/nR/5kKDjF89VjggMUgGnQIer5Bjvt
+        QV8V2FEQ5WcD5esmwjD8cQLpD2+SrM7X26NE7VFbGl3y2bUeqFjWP3bJbNV4S7g9
+        1NYow7EN/RHBsBxANHkWQoZphp5h31U5K2NrVauZAoGAE4IiLN2KJ4qKvBVFhVbJ
+        RQnYW+JjLyMqvN2rdtEC3jZc2c9yUYgRZlCpxim6EC6AwnCTWF2PFwPUYfd8qzYh
+        SYIRGvC8ghXM6kYCdVf4qEX56VLSpLfTaheT5yHiOThD2CxEsjkfTZhhMJbgy5Ob
+        D16/oTfqqse51dZJm7UQDh0=
+        -----END PRIVATE KEY-----
+    always-encrypt-paths:
+#        - /base/login
+#        - /base/captcha
+#        - /user/changePassword
+#        - /user/admin_register

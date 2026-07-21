@@ -3,11 +3,14 @@ import { useUserStore } from '@/pinia/modules/user'
 import { ElLoading, ElMessage } from 'element-plus'
 import { emitter } from '@/utils/bus'
 import router from '@/router/index'
+import { attachEncryptInterceptor } from '@/utils/cryptox/encrypt-interceptor'
 
 const DEFAULT_REQUEST_TIMEOUT = 1000 * 60 * 10
 const DEFAULT_LOADING_FORCE_CLOSE_DELAY = 30000
-
 const service = axios.create()
+
+// 绑定加解密拦截器(在业务拦截器注册之前调用,确保 LIFO/FIFO 顺序正确)
+attachEncryptInterceptor(service)
 
 let activeAxios = 0
 let persistentLoadingCount = 0
@@ -117,7 +120,7 @@ const resetLoading = () => {
 }
 
 service.interceptors.request.use(
-  (config) => {
+  async (config) => {
     if (typeof config.timeout === 'undefined') {
       config.timeout = DEFAULT_REQUEST_TIMEOUT
     }
@@ -187,7 +190,7 @@ const showErrorMessage = (rawMessage) => {
 }
 
 service.interceptors.response.use(
-  (response) => {
+  async (response) => {
     const userStore = useUserStore()
 
     if (!response.config.donNotShowLoading) {
