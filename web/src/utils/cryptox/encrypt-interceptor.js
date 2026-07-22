@@ -11,22 +11,15 @@
 //   attachEncryptInterceptor(service)  // 在注册其他拦截器之前调用
 
 import { emitter } from '@/utils/bus'
-import {
-  encryptRequestPayload,
-  decryptResponsePayload,
-  setServerPublicKey,
-  isServerPublicKeyReady
-} from './index'
+import { decryptResponsePayload, encryptRequestPayload, isServerPublicKeyReady, setServerPublicKey } from './index'
 
 const ENCRYPT_HEADER = 'encrypt-key'
 const RESPONSE_ENCRYPTED_HEADER = 'x-response-encrypted'
 
 // 全局开关: VITE_APP_ENCRYPT=true 才启用加解密
-const ENCRYPT_ENABLED =
-  String(import.meta.env.VITE_APP_ENCRYPT || '').toLowerCase() === 'true'
+const ENCRYPT_ENABLED = String(import.meta.env.VITE_APP_ENCRYPT || '').toLowerCase() === 'true'
 
 // ---------- 启动时加载后端 RSA 公钥 ----------
-
 if (ENCRYPT_ENABLED) {
   const pem = import.meta.env.VITE_APP_RSA_PUBLIC_KEY
   if (pem) {
@@ -60,7 +53,6 @@ function encryptRequestInterceptor(config) {
 
 async function ensurePublicKeyReady() {
   if (isServerPublicKeyReady()) return
-
   const pem = import.meta.env.VITE_APP_RSA_PUBLIC_KEY
   if (!pem) {
     const err = new Error('未配置 VITE_APP_RSA_PUBLIC_KEY')
@@ -111,8 +103,7 @@ async function decryptResponseInterceptor(response) {
       typeof response.data === 'string'
         ? response.data
         : response.request?.responseText || JSON.stringify(response.data)
-    const plain = await decryptResponsePayload(rawText, response.config._aesKey)
-    response.data = plain
+    response.data = await decryptResponsePayload(rawText, response.config._aesKey)
     return response
   } catch (e) {
     emitter.emit('show-error', {
