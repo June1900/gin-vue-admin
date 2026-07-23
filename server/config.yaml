@@ -78,7 +78,7 @@ email:
 # system configuration
 system:
     env: local # 修改为public可以关闭路由日志输出
-    addr: 8888
+    addr: 18888
     db-type: pgsql
     oss-type: local # 控制oss选择走本地还是 七牛等其他仓 自行增加其他oss仓可以在 server/utils/upload/upload.go 中 NewOss函数配置
     use-redis: false # 使用redis
@@ -343,8 +343,11 @@ api-decrypt:
         SYIRGvC8ghXM6kYCdVf4qEX56VLSpLfTaheT5yHiOThD2CxEsjkfTZhhMJbgy5Ob
         D16/oTfqqse51dZJm7UQDh0=
         -----END PRIVATE KEY-----
+    # 始终加密的路径列表: 无需在路由里写注解,命中即自动加密(请求+响应)。
+    # 这些路径与前端 isEncrypt:true 的接口一一对应。删除某项即对该路径关闭加密。
+    # 也支持 /base/* 这类 glob 后缀匹配。
     always-encrypt-paths:
 #        - /base/login
 #        - /base/captcha
-#        - /user/changePassword
 #        - /user/admin_register
+#        - /user/changePassword

@@ -1,0 +1,17 @@
+{
+  "$schema": "https://oxc.rs/schema/oxlint.json",
+  "ignorePatterns": [
+    "dist/**",
+    "build/**",
+    "src/assets/**",
+    "public/**"
+  ],
+  "rules": {
+    "vue/max-attributes-per-line": "off",
+    "vue/no-v-model-argument": "off",
+    "vue/multi-word-component-names": "off",
+    "no-lone-blocks": "off",
+    "no-extend-native": "off",
+    "no-unused-vars": ["error", { "argsIgnorePattern": "^_" }]
+  }
+}

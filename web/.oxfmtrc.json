@@ -1,0 +1,12 @@
+{
+  "$schema": "https://oxc.rs/schema/oxfmt.json",
+  "indentStyle": "space",
+  "indentWidth": 2,
+  "lineWidth": 80,
+  "quoteStyle": "single",
+  "semicolons": "asNeeded",
+  "trailingComma": "none",
+  "arrowParentheses": "always",
+  "vueIndentScriptAndStyle": true,
+  "lineEnding": "lf"
+}

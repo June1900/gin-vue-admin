@@ -76,14 +76,17 @@ func (w *apiEncryptResponseWriter) Status() int {
 
 // CryptoFilter 加解密过滤器中间件。
 //
-// 触发条件(三选一即可,按命中顺序判断):
-//  1. 请求中包含 encrypt-key 请求头(客户端主动加密)
-//  2. gin context 中已设置 GVA_REQUEST_DECRYPTED=true(由 @ApiEncrypt 注解标记)
-//  3. 请求路径命中 always-encrypt-paths(默认登录/注册等)
+// 是否加密**完全由配置驱动**,无需在路由里写死注解:
+//   - 全局开关 api-decrypt.enabled 控制整体启用/旁路
+//   - always-encrypt-paths(配置文件)列出需要加密的路径,无需任何注解即生效
+//   - 前端对单接口标 isEncrypt:true 时携带 encrypt-key 头,后端自动解密请求并加密响应
+//
+// 请求解密触发(任一): encrypt-key 请求头存在 / 注解标记 / 路径命中 always-encrypt-paths
+// 响应加密触发(任一): 注解 CtxResponseEncrypted / 路径命中 always-encrypt-paths / 请求携带 encrypt-key 头
 //
 // 命中后行为:
 //   - 入站: 读 encrypt-key 头,RSA 私钥解出 AES key,重写请求体
-//   - 出站: 当 CtxResponseEncrypted=true 时加密 body,写 encrypt-key 响应头
+//   - 出站: 加密 body,写 encrypt-key 响应头(响应加密复用请求中的 AES key)
 func CryptoFilter() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		cfg := global.GVA_CONFIG.APIDecrypt
@@ -98,7 +101,7 @@ func CryptoFilter() gin.HandlerFunc {
 		}
 
 		needRequestDecrypt := needRequestDecrypt(c, headerFlag)
-		needResponseEncrypt := needResponseEncrypt(c)
+		needResponseEncrypt := needResponseEncrypt(c, headerFlag)
 
 		// ---------- 入站:解密请求 ----------
 		var aesKey []byte
@@ -219,8 +222,14 @@ func needRequestDecrypt(c *gin.Context, headerFlag string) bool {
 }
 
 // needResponseEncrypt 判断是否需要加密响应。
-// 规则: 注解 CtxResponseEncrypted=true 或 always-encrypt 路径。
-func needResponseEncrypt(c *gin.Context) bool {
+// 规则(任一满足即加密):
+//  1. 注解 CtxResponseEncrypted=true(单接口强制)
+//  2. 路径命中 always-encrypt-paths(全局强制,由配置文件驱动)
+//  3. 请求携带 encrypt-key 头(客户端主动加密了请求,响应应同步加密)
+//
+// 第 3 条保证请求/响应对称: 客户端既然加密了请求,响应也应加密返回,
+// 即使该路径未列入 always-encrypt-paths。加密所用的 AES key 复用请求中的那把。
+func needResponseEncrypt(c *gin.Context, headerFlag string) bool {
 	cfg := global.GVA_CONFIG.APIDecrypt
 
 	if v, ok := c.Get(CtxResponseEncrypted); ok {
@@ -233,6 +242,10 @@ func needResponseEncrypt(c *gin.Context) bool {
 		if matchPath(c.Request.URL.Path, p) {
 			return true
 		}
+	}
+
+	if c.GetHeader(headerFlag) != "" {
+		return true
 	}
 	return false
 }
