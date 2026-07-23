@@ -111,6 +111,9 @@ func (userService *UserService) GetUserInfoList(ctx context.Context, info system
 	if info.Email != "" {
 		db = db.Where("email LIKE ?", "%"+info.Email+"%")
 	}
+	if info.Enable != 0 {
+		db = db.Where("enable = ?", info.Enable)
+	}
 
 	err = db.Count(&total).Error
 	if err != nil {
