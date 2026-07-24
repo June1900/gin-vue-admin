@@ -33,7 +33,7 @@ export const register = (data) => {
     url: '/user/admin_register',
     method: 'post',
     data: data,
-    isEncrypt: true
+    isEncrypt: false
   })
 }
 
