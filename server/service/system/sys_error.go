@@ -3,6 +3,7 @@ package system
 import (
 	"context"
 	"fmt"
+
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/common"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/system"
@@ -44,14 +45,18 @@ func (sysErrorService *SysErrorService) UpdateSysError(ctx context.Context, sysE
 
 // GetSysError 根据ID获取错误日志记录
 // Author [yourname](https://github.com/yourname)
-func (sysErrorService *SysErrorService) GetSysError(ctx context.Context, ID string) (sysError system.SysError, err error) {
+func (sysErrorService *SysErrorService) GetSysError(ctx context.Context, ID string) (
+	sysError system.SysError, err error,
+) {
 	err = global.GVA_DB.WithContext(ctx).Where("id = ?", ID).First(&sysError).Error
 	return
 }
 
 // GetSysErrorInfoList 分页获取错误日志记录
 // Author [yourname](https://github.com/yourname)
-func (sysErrorService *SysErrorService) GetSysErrorInfoList(ctx context.Context, info systemReq.SysErrorSearch) (list []system.SysError, total int64, err error) {
+func (sysErrorService *SysErrorService) GetSysErrorInfoList(
+	ctx context.Context, info systemReq.SysErrorSearch,
+) (list []system.SysError, total int64, err error) {
 	limit, offset := info.LimitOffset()
 	// 创建db
 	db := global.GVA_DB.WithContext(ctx).Model(&system.SysError{}).Order("created_at desc")
@@ -59,6 +64,9 @@ func (sysErrorService *SysErrorService) GetSysErrorInfoList(ctx context.Context,
 	// 如果有条件搜索 下方会自动创建搜索语句
 	if len(info.CreatedAtRange) == 2 {
 		db = db.Where("created_at BETWEEN ? AND ?", info.CreatedAtRange[0], info.CreatedAtRange[1])
+	}
+	if info.StartCreatedAt != nil && info.EndCreatedAt != nil {
+		db = db.Where("created_at BETWEEN ? AND ?", info.StartCreatedAt, info.EndCreatedAt)
 	}
 
 	if info.Form != nil && *info.Form != "" {
@@ -119,10 +127,14 @@ func (sysErrorService *SysErrorService) GetSysErrorSolution(ctx context.Context,
 		var solution string
 		if data, err := (&AutoCodeService{}).LLMAuto(bgCtx, llmReq); err == nil {
 			solution = fmt.Sprintf("%v", data.(map[string]interface{})["text"])
-			_ = global.GVA_DB.WithContext(bgCtx).Model(&system.SysError{}).Where("id = ?", id).Updates(map[string]interface{}{"status": "处理完成", "solution": solution}).Error
+			_ = global.GVA_DB.WithContext(bgCtx).Model(&system.SysError{}).Where(
+				"id = ?", id,
+			).Updates(map[string]interface{}{"status": "处理完成", "solution": solution}).Error
 		} else {
 			// 即使生成失败也标记为完成，避免任务卡住
-			_ = global.GVA_DB.WithContext(bgCtx).Model(&system.SysError{}).Where("id = ?", id).Update("status", "处理失败").Error
+			_ = global.GVA_DB.WithContext(bgCtx).Model(&system.SysError{}).Where("id = ?", id).Update(
+				"status", "处理失败",
+			).Error
 		}
 	}(ID)
 
