@@ -2,6 +2,28 @@ definitions:
   common.JSONMap:
     additionalProperties: {}
     type: object
+  config.APIDecrypt:
+    properties:
+      always-encrypt-paths:
+        description: 始终加密的路径 (如登录),无需注解默认走加密。
+        items:
+          type: string
+        type: array
+      enabled:
+        description: Enabled 是否启用加解密过滤器;关闭后中间件直接放行。
+        type: boolean
+      header-flag:
+        description: HeaderFlag 传递加密 AES key 的请求/响应头名称,默认 encrypt-key。
+        type: string
+      private-key:
+        description: PrivateKey RSA 私钥 (PEM),用于解密请求中的 AES key。
+        type: string
+      public-key:
+        description: |-
+          PublicKey RSA 公钥 (PEM),用于加密响应 AES key。
+          客户端持有对应私钥或与前端共享的对称密钥约定。
+        type: string
+    type: object
   config.AliyunOSS:
     properties:
       access-key-id:
@@ -508,6 +530,10 @@ definitions:
     properties:
       aliyun-oss:
         $ref: '#/definitions/config.AliyunOSS'
+      api-decrypt:
+        allOf:
+        - $ref: '#/definitions/config.APIDecrypt'
+        description: API 加解密过滤器配置
       app:
         allOf:
         - $ref: '#/definitions/config.App'
@@ -1370,6 +1396,8 @@ definitions:
         type: boolean
       email:
         type: string
+      enable:
+        type: integer
       keyword:
         description: 关键字
         type: string
@@ -1852,7 +1880,9 @@ definitions:
         description: 更新时间
         type: string
       user:
-        $ref: '#/definitions/system.SysUser'
+        allOf:
+        - $ref: '#/definitions/system.SysUser'
+        description: 所属用户(Preload 填充);form:"-" 阻止 gin 查询绑定递归进 SysUser
       userId:
         type: integer
     type: object
@@ -2011,6 +2041,22 @@ definitions:
       status:
         description: 是否启用
         type: boolean
+    type: object
+  request.ToggleTimedTask:
+    properties:
+      ID:
+        type: integer
+      enabled:
+        type: boolean
+    required:
+    - ID
+    type: object
+  request.TriggerTimedTask:
+    properties:
+      ID:
+        type: integer
+    required:
+    - ID
     type: object
   request.UpdateSysCliRequest:
     properties:
@@ -2389,7 +2435,9 @@ definitions:
         description: 更新时间
         type: string
       user:
-        $ref: '#/definitions/system.SysUser'
+        allOf:
+        - $ref: '#/definitions/system.SysUser'
+        description: 所属用户(Preload 填充);form:"-" 阻止 gin 查询绑定递归进 SysUser
       userId:
         type: integer
     type: object
@@ -2579,12 +2627,15 @@ definitions:
       leader:
         allOf:
         - $ref: '#/definitions/system.SysUser'
-        description: 负责人用户(联系电话/邮箱从该用户带出)
+        description: 负责人用户(联系电话/邮箱从该用户带出);form:"-" 阻断 gin 绑定递归(与 SysUser.Dept 成环会栈溢出)
       leaderId:
         description: 负责人(关联 sys_users)
         type: integer
       name:
         description: 部门名称
+        type: string
+      namePath:
+        description: 公司/部门全路径名(内存组装,不建列)
         type: string
       parentId:
         description: 父部门ID(0为顶级)
@@ -2781,7 +2832,9 @@ definitions:
         description: 更新时间
         type: string
       user:
-        $ref: '#/definitions/system.SysUser'
+        allOf:
+        - $ref: '#/definitions/system.SysUser'
+        description: 登录用户(Preload 填充);form:"-" 阻止 gin 查询绑定递归进 SysUser
       userId:
         type: integer
       username:
@@ -2891,7 +2944,9 @@ definitions:
         description: 更新时间
         type: string
       user:
-        $ref: '#/definitions/system.SysUser'
+        allOf:
+        - $ref: '#/definitions/system.SysUser'
+        description: 操作人(Preload 填充);form:"-" 阻止 gin 查询绑定递归进 SysUser
       user_id:
         description: 用户id
         type: integer
@@ -3004,6 +3059,44 @@ definitions:
         description: 更新时间
         type: string
     type: object
+  system.SysTimedTask:
+    properties:
+      ID:
+        description: 主键ID
+        type: integer
+      createdAt:
+        description: 创建时间
+        type: string
+      description:
+        type: string
+      enabled:
+        type: boolean
+      executorType:
+        type: string
+      httpAllowPrivate:
+        type: boolean
+      httpBody:
+        type: string
+      httpHeader:
+        type: object
+      httpMethod:
+        type: string
+      httpUrl:
+        type: string
+      methodName:
+        type: string
+      name:
+        type: string
+      params:
+        type: object
+      spec:
+        type: string
+      updatedAt:
+        description: 更新时间
+        type: string
+      withSeconds:
+        type: boolean
+    type: object
   system.SysUser:
     properties:
       ID:
@@ -3032,7 +3125,7 @@ definitions:
       dept:
         allOf:
         - $ref: '#/definitions/system.SysDepartment'
-        description: 主部门
+        description: 主部门;form:"-" 阻断 gin 绑定递归(与 SysDepartment.Leader 成环会栈溢出)
       deptId:
         description: 主部门ID(数据归属)
         type: integer
@@ -8032,6 +8125,76 @@ paths:
       summary: 分页获取SysDictionary列表
       tags:
       - SysDictionary
+  /sysDictionary/getSysDictionaryListWithDetails:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: 字典名（中）
+        in: query
+        name: name
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 字典列表(每项含 SysDictionaryDetails)
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/system.SysDictionary'
+                  type: array
+                msg:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 获取字典列表(含字典项明细)
+      tags:
+      - SysDictionary
+  /sysDictionary/getSysDictionaryPage:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: 关键字
+        in: query
+        name: keyword
+        type: string
+      - description: 字典名（中）
+        in: query
+        name: name
+        type: string
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页大小
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 分页获取SysDictionary列表,返回包括列表,总数,页码,每页数量
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/response.PageResult'
+                msg:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 分页获取SysDictionary列表
+      tags:
+      - SysDictionary
   /sysDictionary/importSysDictionary:
     post:
       consumes:
@@ -10053,6 +10216,269 @@ paths:
       summary: 设置配置文件内容
       tags:
       - System
+  /timedTask/alertStream:
+    get:
+      produces:
+      - text/event-stream
+      responses:
+        "200":
+          description: SSE 流
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: 订阅定时任务失败告警(SSE)
+      tags:
+      - SysTimedTask
+  /timedTask/createTimedTask:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 任务定义
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/system.SysTimedTask'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 创建成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                msg:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 创建定时任务
+      tags:
+      - SysTimedTask
+  /timedTask/deleteTimedTask:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: 任务ID
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.TriggerTimedTask'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 删除成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                msg:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 删除定时任务
+      tags:
+      - SysTimedTask
+  /timedTask/getRegisteredMethods:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  additionalProperties: true
+                  type: object
+                msg:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 获取已注册方法列表(供下拉选择)
+      tags:
+      - SysTimedTask
+  /timedTask/getTimedTaskList:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - in: query
+        name: enabled
+        type: boolean
+      - in: query
+        name: executorType
+        type: string
+      - description: 关键字
+        in: query
+        name: keyword
+        type: string
+      - in: query
+        name: name
+        type: string
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页大小
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/response.PageResult'
+                msg:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 分页获取定时任务列表(含下次执行时间)
+      tags:
+      - SysTimedTask
+  /timedTask/getTimedTaskLogList:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: 关键字
+        in: query
+        name: keyword
+        type: string
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页大小
+        in: query
+        name: pageSize
+        type: integer
+      - in: query
+        name: status
+        type: string
+      - in: query
+        name: taskId
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/response.PageResult'
+                msg:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 分页获取执行日志
+      tags:
+      - SysTimedTask
+  /timedTask/toggleTimedTask:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: ID与目标状态
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.ToggleTimedTask'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 操作成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                msg:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 启用/停用定时任务
+      tags:
+      - SysTimedTask
+  /timedTask/triggerTimedTask:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 任务ID
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.TriggerTimedTask'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 已触发
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                msg:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 手动触发一次执行
+      tags:
+      - SysTimedTask
+  /timedTask/updateTimedTask:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 任务定义(含ID)
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/system.SysTimedTask'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 更新成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                msg:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 更新定时任务
+      tags:
+      - SysTimedTask
   /user/SetSelfInfo:
     put:
       consumes:

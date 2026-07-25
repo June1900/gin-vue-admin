@@ -47,7 +47,9 @@ func (i *initApi) InitializeData(ctx context.Context) (context.Context, error) {
 		{ApiGroup: "jwt", Method: "POST", Path: "/jwt/jsonInBlacklist", Description: "jwt加入黑名单(退出，必选)"},
 
 		{ApiGroup: "登录日志", Method: "DELETE", Path: "/sysLoginLog/deleteLoginLog", Description: "删除登录日志"},
-		{ApiGroup: "登录日志", Method: "DELETE", Path: "/sysLoginLog/deleteLoginLogByIds", Description: "批量删除登录日志"},
+		{
+			ApiGroup: "登录日志", Method: "DELETE", Path: "/sysLoginLog/deleteLoginLogByIds", Description: "批量删除登录日志",
+		},
 		{ApiGroup: "登录日志", Method: "GET", Path: "/sysLoginLog/findLoginLog", Description: "根据ID获取登录日志"},
 		{ApiGroup: "登录日志", Method: "GET", Path: "/sysLoginLog/getLoginLogList", Description: "获取登录日志列表"},
 
@@ -64,8 +66,12 @@ func (i *initApi) InitializeData(ctx context.Context) (context.Context, error) {
 		{ApiGroup: "定时任务", Method: "POST", Path: "/timedTask/toggleTimedTask", Description: "启用/停用定时任务"},
 		{ApiGroup: "定时任务", Method: "POST", Path: "/timedTask/triggerTimedTask", Description: "手动触发定时任务"},
 		{ApiGroup: "定时任务", Method: "GET", Path: "/timedTask/getTimedTaskList", Description: "获取定时任务列表"},
-		{ApiGroup: "定时任务", Method: "GET", Path: "/timedTask/getTimedTaskLogList", Description: "获取定时任务执行日志"},
-		{ApiGroup: "定时任务", Method: "GET", Path: "/timedTask/getRegisteredMethods", Description: "获取已注册方法列表"},
+		{
+			ApiGroup: "定时任务", Method: "GET", Path: "/timedTask/getTimedTaskLogList", Description: "获取定时任务执行日志",
+		},
+		{
+			ApiGroup: "定时任务", Method: "GET", Path: "/timedTask/getRegisteredMethods", Description: "获取已注册方法列表",
+		},
 		{ApiGroup: "定时任务", Method: "GET", Path: "/timedTask/alertStream", Description: "订阅定时任务失败告警(SSE)"},
 
 		{ApiGroup: "系统用户", Method: "DELETE", Path: "/user/deleteUser", Description: "删除用户"},
@@ -104,9 +110,17 @@ func (i *initApi) InitializeData(ctx context.Context) (context.Context, error) {
 		{ApiGroup: "角色", Method: "POST", Path: "/authority/setDataScope", Description: "设置角色数据权限"},
 		{ApiGroup: "角色", Method: "GET", Path: "/authority/getDataScopeDepts", Description: "获取角色自定义部门集"},
 
-		{ApiGroup: "数据权限审计", Method: "POST", Path: "/dataAccessLog/getDataAccessLogList", Description: "获取数据权限审计日志"},
-		{ApiGroup: "数据权限审计", Method: "DELETE", Path: "/dataAccessLog/deleteDataAccessLogByIds", Description: "批量删除数据权限审计日志"},
-		{ApiGroup: "角色", Method: "GET", Path: "/authority/getUsersByAuthority", Description: "获取角色关联用户ID列表"},
+		{
+			ApiGroup: "数据权限审计", Method: "POST", Path: "/dataAccessLog/getDataAccessLogList",
+			Description: "获取数据权限审计日志",
+		},
+		{
+			ApiGroup: "数据权限审计", Method: "DELETE", Path: "/dataAccessLog/deleteDataAccessLogByIds",
+			Description: "批量删除数据权限审计日志",
+		},
+		{
+			ApiGroup: "角色", Method: "GET", Path: "/authority/getUsersByAuthority", Description: "获取角色关联用户ID列表",
+		},
 		{ApiGroup: "角色", Method: "POST", Path: "/authority/setRoleUsers", Description: "全量覆盖角色关联用户"},
 
 		{ApiGroup: "部门", Method: "POST", Path: "/department/createDepartment", Description: "创建部门"},
@@ -115,7 +129,9 @@ func (i *initApi) InitializeData(ctx context.Context) (context.Context, error) {
 		{ApiGroup: "部门", Method: "POST", Path: "/department/getDepartmentList", Description: "获取部门树"},
 		{ApiGroup: "部门", Method: "GET", Path: "/department/findDepartment", Description: "根据ID获取部门"},
 		{ApiGroup: "部门", Method: "GET", Path: "/department/getDepartmentUsers", Description: "获取部门成员ID列表"},
-		{ApiGroup: "部门", Method: "POST", Path: "/department/setDepartmentUsers", Description: "设置部门成员(反向分配)"},
+		{
+			ApiGroup: "部门", Method: "POST", Path: "/department/setDepartmentUsers", Description: "设置部门成员(反向分配)",
+		},
 
 		{ApiGroup: "岗位", Method: "POST", Path: "/position/createPosition", Description: "创建岗位"},
 		{ApiGroup: "岗位", Method: "PUT", Path: "/position/updatePosition", Description: "更新岗位"},
@@ -145,10 +161,20 @@ func (i *initApi) InitializeData(ctx context.Context) (context.Context, error) {
 		{ApiGroup: "媒体上传", Method: "POST", Path: "/mediaUpload/complete", Description: "完成大文件上传"},
 		{ApiGroup: "媒体上传", Method: "DELETE", Path: "/mediaUpload/:uploadId", Description: "取消大文件上传"},
 
-		{ApiGroup: "文件上传与下载", Method: "POST", Path: "/fileUploadAndDownload/upload", Description: "文件上传（建议选择）"},
-		{ApiGroup: "文件上传与下载", Method: "POST", Path: "/fileUploadAndDownload/deleteFile", Description: "删除文件"},
-		{ApiGroup: "文件上传与下载", Method: "POST", Path: "/fileUploadAndDownload/editFileName", Description: "文件名或者备注编辑"},
-		{ApiGroup: "文件上传与下载", Method: "POST", Path: "/fileUploadAndDownload/getFileList", Description: "获取上传文件列表"},
+		{
+			ApiGroup: "文件上传与下载", Method: "POST", Path: "/fileUploadAndDownload/upload", Description: "文件上传（建议选择）",
+		},
+		{
+			ApiGroup: "文件上传与下载", Method: "POST", Path: "/fileUploadAndDownload/deleteFile", Description: "删除文件",
+		},
+		{
+			ApiGroup: "文件上传与下载", Method: "POST", Path: "/fileUploadAndDownload/editFileName",
+			Description: "文件名或者备注编辑",
+		},
+		{
+			ApiGroup: "文件上传与下载", Method: "POST", Path: "/fileUploadAndDownload/getFileList",
+			Description: "获取上传文件列表",
+		},
 		{ApiGroup: "文件上传与下载", Method: "POST", Path: "/fileUploadAndDownload/importURL", Description: "导入URL"},
 
 		{ApiGroup: "系统服务", Method: "POST", Path: "/system/getServerInfo", Description: "获取服务器信息"},
@@ -161,35 +187,89 @@ func (i *initApi) InitializeData(ctx context.Context) (context.Context, error) {
 		{ApiGroup: "客户", Method: "GET", Path: "/customer/customer", Description: "获取单一客户"},
 		{ApiGroup: "客户", Method: "GET", Path: "/customer/customerList", Description: "获取客户列表"},
 
-		{ApiGroup: "系统字典详情", Method: "PUT", Path: "/sysDictionaryDetail/updateSysDictionaryDetail", Description: "更新字典内容"},
-		{ApiGroup: "系统字典详情", Method: "POST", Path: "/sysDictionaryDetail/createSysDictionaryDetail", Description: "新增字典内容"},
-		{ApiGroup: "系统字典详情", Method: "DELETE", Path: "/sysDictionaryDetail/deleteSysDictionaryDetail", Description: "删除字典内容"},
-		{ApiGroup: "系统字典详情", Method: "GET", Path: "/sysDictionaryDetail/findSysDictionaryDetail", Description: "根据ID获取字典内容"},
-		{ApiGroup: "系统字典详情", Method: "GET", Path: "/sysDictionaryDetail/getSysDictionaryDetailList", Description: "获取字典内容列表"},
+		{
+			ApiGroup: "系统字典详情", Method: "PUT", Path: "/sysDictionaryDetail/updateSysDictionaryDetail",
+			Description: "更新字典内容",
+		},
+		{
+			ApiGroup: "系统字典详情", Method: "POST", Path: "/sysDictionaryDetail/createSysDictionaryDetail",
+			Description: "新增字典内容",
+		},
+		{
+			ApiGroup: "系统字典详情", Method: "DELETE", Path: "/sysDictionaryDetail/deleteSysDictionaryDetail",
+			Description: "删除字典内容",
+		},
+		{
+			ApiGroup: "系统字典详情", Method: "GET", Path: "/sysDictionaryDetail/findSysDictionaryDetail",
+			Description: "根据ID获取字典内容",
+		},
+		{
+			ApiGroup: "系统字典详情", Method: "GET", Path: "/sysDictionaryDetail/getSysDictionaryDetailList",
+			Description: "获取字典内容列表",
+		},
 
-		{ApiGroup: "系统字典详情", Method: "GET", Path: "/sysDictionaryDetail/getDictionaryTreeList", Description: "获取字典数列表"},
-		{ApiGroup: "系统字典详情", Method: "GET", Path: "/sysDictionaryDetail/getDictionaryTreeListByType", Description: "根据分类获取字典数列表"},
-		{ApiGroup: "系统字典详情", Method: "GET", Path: "/sysDictionaryDetail/getDictionaryDetailsByParent", Description: "根据父级ID获取字典详情"},
-		{ApiGroup: "系统字典详情", Method: "GET", Path: "/sysDictionaryDetail/getDictionaryPath", Description: "获取字典详情的完整路径"},
+		{
+			ApiGroup: "系统字典详情", Method: "GET", Path: "/sysDictionaryDetail/getDictionaryTreeList",
+			Description: "获取字典数列表",
+		},
+		{
+			ApiGroup: "系统字典详情", Method: "GET", Path: "/sysDictionaryDetail/getDictionaryTreeListByType",
+			Description: "根据分类获取字典数列表",
+		},
+		{
+			ApiGroup: "系统字典详情", Method: "GET", Path: "/sysDictionaryDetail/getDictionaryDetailsByParent",
+			Description: "根据父级ID获取字典详情",
+		},
+		{
+			ApiGroup: "系统字典详情", Method: "GET", Path: "/sysDictionaryDetail/getDictionaryPath",
+			Description: "获取字典详情的完整路径",
+		},
 
 		{ApiGroup: "系统字典", Method: "POST", Path: "/sysDictionary/createSysDictionary", Description: "新增字典"},
 		{ApiGroup: "系统字典", Method: "DELETE", Path: "/sysDictionary/deleteSysDictionary", Description: "删除字典"},
 		{ApiGroup: "系统字典", Method: "PUT", Path: "/sysDictionary/updateSysDictionary", Description: "更新字典"},
-		{ApiGroup: "系统字典", Method: "GET", Path: "/sysDictionary/findSysDictionary", Description: "根据ID获取字典（建议选择）"},
+		{
+			ApiGroup: "系统字典", Method: "GET", Path: "/sysDictionary/findSysDictionary", Description: "根据ID获取字典（建议选择）",
+		},
 		{ApiGroup: "系统字典", Method: "GET", Path: "/sysDictionary/getSysDictionaryList", Description: "获取字典列表"},
-		{ApiGroup: "系统字典", Method: "GET", Path: "/sysDictionary/getSysDictionaryListWithDetails", Description: "获取字典列表(含明细)"},
+		{
+			ApiGroup: "系统字典", Method: "GET", Path: "/sysDictionary/getSysDictionaryPage", Description: "获取字典分页列表",
+		},
+		{
+			ApiGroup: "系统字典", Method: "GET", Path: "/sysDictionary/getSysDictionaryListWithDetails",
+			Description: "获取字典列表(含明细)",
+		},
 		{ApiGroup: "系统字典", Method: "POST", Path: "/sysDictionary/importSysDictionary", Description: "导入字典JSON"},
 		{ApiGroup: "系统字典", Method: "GET", Path: "/sysDictionary/exportSysDictionary", Description: "导出字典JSON"},
 
-		{ApiGroup: "操作记录", Method: "POST", Path: "/sysOperationRecord/createSysOperationRecord", Description: "新增操作记录"},
-		{ApiGroup: "操作记录", Method: "GET", Path: "/sysOperationRecord/findSysOperationRecord", Description: "根据ID获取操作记录"},
-		{ApiGroup: "操作记录", Method: "GET", Path: "/sysOperationRecord/getSysOperationRecordList", Description: "获取操作记录列表"},
-		{ApiGroup: "操作记录", Method: "DELETE", Path: "/sysOperationRecord/deleteSysOperationRecord", Description: "删除操作记录"},
-		{ApiGroup: "操作记录", Method: "DELETE", Path: "/sysOperationRecord/deleteSysOperationRecordByIds", Description: "批量删除操作历史"},
+		{
+			ApiGroup: "操作记录", Method: "POST", Path: "/sysOperationRecord/createSysOperationRecord",
+			Description: "新增操作记录",
+		},
+		{
+			ApiGroup: "操作记录", Method: "GET", Path: "/sysOperationRecord/findSysOperationRecord",
+			Description: "根据ID获取操作记录",
+		},
+		{
+			ApiGroup: "操作记录", Method: "GET", Path: "/sysOperationRecord/getSysOperationRecordList",
+			Description: "获取操作记录列表",
+		},
+		{
+			ApiGroup: "操作记录", Method: "DELETE", Path: "/sysOperationRecord/deleteSysOperationRecord",
+			Description: "删除操作记录",
+		},
+		{
+			ApiGroup: "操作记录", Method: "DELETE", Path: "/sysOperationRecord/deleteSysOperationRecordByIds",
+			Description: "批量删除操作历史",
+		},
 
 		{ApiGroup: "断点续传(插件版)", Method: "POST", Path: "/simpleUploader/upload", Description: "插件版分片上传"},
-		{ApiGroup: "断点续传(插件版)", Method: "GET", Path: "/simpleUploader/checkFileMd5", Description: "文件完整度验证"},
-		{ApiGroup: "断点续传(插件版)", Method: "GET", Path: "/simpleUploader/mergeFileMd5", Description: "上传完成合并文件"},
+		{
+			ApiGroup: "断点续传(插件版)", Method: "GET", Path: "/simpleUploader/checkFileMd5", Description: "文件完整度验证",
+		},
+		{
+			ApiGroup: "断点续传(插件版)", Method: "GET", Path: "/simpleUploader/mergeFileMd5", Description: "上传完成合并文件",
+		},
 
 		{ApiGroup: "email", Method: "POST", Path: "/email/emailTest", Description: "发送测试邮件"},
 		{ApiGroup: "email", Method: "POST", Path: "/email/sendEmail", Description: "发送邮件"},
@@ -198,12 +278,30 @@ func (i *initApi) InitializeData(ctx context.Context) (context.Context, error) {
 		{ApiGroup: "按钮权限", Method: "POST", Path: "/authorityBtn/getAuthorityBtn", Description: "获取已有按钮权限"},
 		{ApiGroup: "按钮权限", Method: "POST", Path: "/authorityBtn/canRemoveAuthorityBtn", Description: "删除按钮"},
 
-		{ApiGroup: "导出模板", Method: "POST", Path: "/sysExportTemplate/createSysExportTemplate", Description: "新增导出模板"},
-		{ApiGroup: "导出模板", Method: "DELETE", Path: "/sysExportTemplate/deleteSysExportTemplate", Description: "删除导出模板"},
-		{ApiGroup: "导出模板", Method: "DELETE", Path: "/sysExportTemplate/deleteSysExportTemplateByIds", Description: "批量删除导出模板"},
-		{ApiGroup: "导出模板", Method: "PUT", Path: "/sysExportTemplate/updateSysExportTemplate", Description: "更新导出模板"},
-		{ApiGroup: "导出模板", Method: "GET", Path: "/sysExportTemplate/findSysExportTemplate", Description: "根据ID获取导出模板"},
-		{ApiGroup: "导出模板", Method: "GET", Path: "/sysExportTemplate/getSysExportTemplateList", Description: "获取导出模板列表"},
+		{
+			ApiGroup: "导出模板", Method: "POST", Path: "/sysExportTemplate/createSysExportTemplate",
+			Description: "新增导出模板",
+		},
+		{
+			ApiGroup: "导出模板", Method: "DELETE", Path: "/sysExportTemplate/deleteSysExportTemplate",
+			Description: "删除导出模板",
+		},
+		{
+			ApiGroup: "导出模板", Method: "DELETE", Path: "/sysExportTemplate/deleteSysExportTemplateByIds",
+			Description: "批量删除导出模板",
+		},
+		{
+			ApiGroup: "导出模板", Method: "PUT", Path: "/sysExportTemplate/updateSysExportTemplate",
+			Description: "更新导出模板",
+		},
+		{
+			ApiGroup: "导出模板", Method: "GET", Path: "/sysExportTemplate/findSysExportTemplate",
+			Description: "根据ID获取导出模板",
+		},
+		{
+			ApiGroup: "导出模板", Method: "GET", Path: "/sysExportTemplate/getSysExportTemplateList",
+			Description: "获取导出模板列表",
+		},
 		{ApiGroup: "导出模板", Method: "GET", Path: "/sysExportTemplate/exportExcel", Description: "导出Excel"},
 		{ApiGroup: "导出模板", Method: "GET", Path: "/sysExportTemplate/exportTemplate", Description: "下载模板"},
 		{ApiGroup: "导出模板", Method: "GET", Path: "/sysExportTemplate/previewSQL", Description: "预览SQL"},
@@ -211,7 +309,9 @@ func (i *initApi) InitializeData(ctx context.Context) (context.Context, error) {
 
 		{ApiGroup: "错误日志", Method: "POST", Path: "/sysError/createSysError", Description: "新建错误日志"},
 		{ApiGroup: "错误日志", Method: "DELETE", Path: "/sysError/deleteSysError", Description: "删除错误日志"},
-		{ApiGroup: "错误日志", Method: "DELETE", Path: "/sysError/deleteSysErrorByIds", Description: "批量删除错误日志"},
+		{
+			ApiGroup: "错误日志", Method: "DELETE", Path: "/sysError/deleteSysErrorByIds", Description: "批量删除错误日志",
+		},
 		{ApiGroup: "错误日志", Method: "PUT", Path: "/sysError/updateSysError", Description: "更新错误日志"},
 		{ApiGroup: "错误日志", Method: "GET", Path: "/sysError/findSysError", Description: "根据ID获取错误日志"},
 		{ApiGroup: "错误日志", Method: "GET", Path: "/sysError/getSysErrorList", Description: "获取错误日志列表"},
@@ -241,7 +341,9 @@ func (i *initApi) InitializeData(ctx context.Context) (context.Context, error) {
 		{ApiGroup: "版本控制", Method: "POST", Path: "/sysVersion/exportVersion", Description: "创建版本"},
 		{ApiGroup: "版本控制", Method: "POST", Path: "/sysVersion/importVersion", Description: "同步版本"},
 		{ApiGroup: "版本控制", Method: "DELETE", Path: "/sysVersion/deleteSysVersion", Description: "删除版本"},
-		{ApiGroup: "版本控制", Method: "DELETE", Path: "/sysVersion/deleteSysVersionByIds", Description: "批量删除版本"},
+		{
+			ApiGroup: "版本控制", Method: "DELETE", Path: "/sysVersion/deleteSysVersionByIds", Description: "批量删除版本",
+		},
 	}
 	if err := db.Create(&entities).Error; err != nil {
 		return ctx, errors.Wrap(err, sysModel.SysApi{}.TableName()+"表数据初始化失败!")
@@ -255,8 +357,10 @@ func (i *initApi) DataInserted(ctx context.Context) bool {
 	if !ok {
 		return false
 	}
-	if errors.Is(db.Where("path = ? AND method = ?", "/authorityBtn/canRemoveAuthorityBtn", "POST").
-		First(&sysModel.SysApi{}).Error, gorm.ErrRecordNotFound) {
+	if errors.Is(
+		db.Where("path = ? AND method = ?", "/authorityBtn/canRemoveAuthorityBtn", "POST").
+			First(&sysModel.SysApi{}).Error, gorm.ErrRecordNotFound,
+	) {
 		return false
 	}
 	return true

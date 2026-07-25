@@ -80,6 +80,22 @@ export const getSysDictionaryList = (params) => {
 }
 
 // @Tags SysDictionary
+// @Summary 分页获取SysDictionary列表
+// @Security ApiKeyAuth
+// @accept application/json
+// @Produce application/json
+// @Param data query request.SysDictionaryPage true "分页参数及搜索条件"
+// @Success 200 {string} string "{"success":true,"data":{list,total,page,pageSize},"msg":"获取成功"}"
+// @Router /sysDictionary/getSysDictionaryPage [get]
+export const getSysDictionaryPage = (params) => {
+  return service({
+    url: '/sysDictionary/getSysDictionaryPage',
+    method: 'get',
+    params
+  })
+}
+
+// @Tags SysDictionary
 // @Summary 导出字典JSON（包含字典详情）
 // @Security ApiKeyAuth
 // @accept application/json

@@ -29,7 +29,7 @@ func (s *DictionaryApi) CreateSysDictionary(c *gin.Context) {
 	created, err := dictionaryService.CreateSysDictionary(c.Request.Context(), dictionary)
 	if err != nil {
 		logger.WithCtx(c.Request.Context()).Mod("biz").Err(err).Error("创建失败!")
-		response.FailWithMessage("创建失败", c)
+		response.FailWithMessage("创建失败: "+err.Error(), c)
 		return
 	}
 	response.OkWithDetailed(created, "创建成功", c)
@@ -133,6 +133,36 @@ func (s *DictionaryApi) GetSysDictionaryList(c *gin.Context) {
 		return
 	}
 	response.OkWithDetailed(list, "获取成功", c)
+}
+
+// GetSysDictionaryPage
+// @Tags      SysDictionary
+// @Summary   分页获取SysDictionary列表
+// @Security  ApiKeyAuth
+// @accept    application/json
+// @Produce   application/json
+// @Param     data  query     request.SysDictionaryPage                                true  "页码, 每页大小, 字典 name 或者 type"
+// @Success   200   {object}  response.Response{data=response.PageResult,msg=string}  "分页获取SysDictionary列表,返回包括列表,总数,页码,每页数量"
+// @Router    /sysDictionary/getSysDictionaryPage [get]
+func (s *DictionaryApi) GetSysDictionaryPage(c *gin.Context) {
+	var req request.SysDictionaryPage
+	err := c.ShouldBindQuery(&req)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+	list, total, err := dictionaryService.GetSysDictionaryPage(c.Request.Context(), req)
+	if err != nil {
+		logger.WithCtx(c.Request.Context()).Mod("biz").Err(err).Error("获取失败!")
+		response.FailWithMessage("获取失败", c)
+		return
+	}
+	response.OkWithDetailed(response.PageResult{
+		List:     list,
+		Total:    total,
+		Page:     req.Page,
+		PageSize: req.PageSize,
+	}, "获取成功", c)
 }
 
 // GetSysDictionaryListWithDetails

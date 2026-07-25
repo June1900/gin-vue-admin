@@ -158,18 +158,18 @@
             />
           </el-select>
         </el-form-item>
-        <el-form-item label="字典名（中）" prop="name">
+        <el-form-item label="字典名称" prop="name">
           <el-input
             v-model="formData.name"
-            placeholder="请输入字典名（中）"
+            placeholder="请输入字典名称"
             clearable
             :style="{ width: '100%' }"
           />
         </el-form-item>
-        <el-form-item label="字典名（英）" prop="type">
+        <el-form-item label="字典标识" prop="type">
           <el-input
             v-model="formData.type"
-            placeholder="请输入字典名（英）"
+            placeholder="请输入字典标识"
             clearable
             :style="{ width: '100%' }"
           />
