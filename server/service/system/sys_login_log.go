@@ -47,8 +47,14 @@ func (loginLogService *LoginLogService) GetLoginLogInfoList(ctx context.Context,
 	if info.Username != "" {
 		db = db.Where("username LIKE ?", "%"+info.Username+"%")
 	}
-	if info.Status != false {
-		db = db.Where("status = ?", info.Status)
+	if info.Ip != "" {
+		db = db.Where("ip LIKE ?", "%"+info.Ip+"%")
+	}
+	if info.Status != nil {
+		db = db.Where("status = ?", *info.Status)
+	}
+	if info.StartCreatedAt != nil && info.EndCreatedAt != nil {
+		db = db.Where("created_at BETWEEN ? AND ?", info.StartCreatedAt, info.EndCreatedAt)
 	}
 	err = db.Count(&total).Error
 	if err != nil {
