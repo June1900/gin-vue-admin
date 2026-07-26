@@ -8744,74 +8744,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/sysDictionary/getSysDictionaryPage": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "SysDictionary"
-                ],
-                "summary": "分页获取SysDictionary列表",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "关键字",
-                        "name": "keyword",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "字典名（中）",
-                        "name": "name",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "description": "页码",
-                        "name": "page",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "description": "每页大小",
-                        "name": "pageSize",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "分页获取SysDictionary列表,返回包括列表,总数,页码,每页数量",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/response.PageResult"
-                                        },
-                                        "msg": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            }
-        },
         "/sysDictionary/importSysDictionary": {
             "post": {
                 "security": [
@@ -13372,34 +13304,6 @@ const docTemplate = `{
             "type": "object",
             "additionalProperties": {}
         },
-        "config.APIDecrypt": {
-            "type": "object",
-            "properties": {
-                "always-encrypt-paths": {
-                    "description": "始终加密的路径 (如登录),无需注解默认走加密。",
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "enabled": {
-                    "description": "Enabled 是否启用加解密过滤器;关闭后中间件直接放行。",
-                    "type": "boolean"
-                },
-                "header-flag": {
-                    "description": "HeaderFlag 传递加密 AES key 的请求/响应头名称,默认 encrypt-key。",
-                    "type": "string"
-                },
-                "private-key": {
-                    "description": "PrivateKey RSA 私钥 (PEM),用于解密请求中的 AES key。",
-                    "type": "string"
-                },
-                "public-key": {
-                    "description": "PublicKey RSA 公钥 (PEM),用于加密响应 AES key。\n客户端持有对应私钥或与前端共享的对称密钥约定。",
-                    "type": "string"
-                }
-            }
-        },
         "config.AliyunOSS": {
             "type": "object",
             "properties": {
@@ -13526,31 +13430,6 @@ const docTemplate = `{
                 }
             }
         },
-        "config.Captcha": {
-            "type": "object",
-            "properties": {
-                "img-height": {
-                    "description": "验证码高度",
-                    "type": "integer"
-                },
-                "img-width": {
-                    "description": "验证码宽度",
-                    "type": "integer"
-                },
-                "key-long": {
-                    "description": "验证码长度",
-                    "type": "integer"
-                },
-                "open-captcha": {
-                    "description": "防爆破验证码开启此数，0代表每次登录都需要验证码，其他数字代表错误密码次数，如3代表错误三次后出现验证码",
-                    "type": "integer"
-                },
-                "open-captcha-timeout": {
-                    "description": "防爆破验证码超时时间，单位：s(秒)",
-                    "type": "integer"
-                }
-            }
-        },
         "config.CloudflareR2": {
             "type": "object",
             "properties": {
@@ -13578,14 +13457,6 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "mount-point": {
-                    "type": "string"
-                }
-            }
-        },
-        "config.Excel": {
-            "type": "object",
-            "properties": {
-                "dir": {
                     "type": "string"
                 }
             }
@@ -13656,9 +13527,6 @@ const docTemplate = `{
                 "base_url": {
                     "type": "string"
                 },
-                "message_path": {
-                    "type": "string"
-                },
                 "name": {
                     "type": "string"
                 },
@@ -13668,17 +13536,7 @@ const docTemplate = `{
                 "request_timeout": {
                     "type": "integer"
                 },
-                "separate": {
-                    "type": "boolean"
-                },
-                "sse_path": {
-                    "description": "Deprecated fields kept for backward compatibility with older configs.",
-                    "type": "string"
-                },
                 "upstream_base_url": {
-                    "type": "string"
-                },
-                "url_prefix": {
                     "type": "string"
                 },
                 "version": {
@@ -13822,10 +13680,6 @@ const docTemplate = `{
                     "description": "是否开启Gorm全局日志",
                     "type": "string"
                 },
-                "log-zap": {
-                    "description": "是否通过zap写入日志文件",
-                    "type": "boolean"
-                },
                 "max-idle-conns": {
                     "description": "空闲中的最大连接数",
                     "type": "integer"
@@ -13883,10 +13737,6 @@ const docTemplate = `{
                 "log-mode": {
                     "description": "是否开启Gorm全局日志",
                     "type": "string"
-                },
-                "log-zap": {
-                    "description": "是否通过zap写入日志文件",
-                    "type": "boolean"
                 },
                 "max-idle-conns": {
                     "description": "空闲中的最大连接数",
@@ -13946,10 +13796,6 @@ const docTemplate = `{
                     "description": "是否开启Gorm全局日志",
                     "type": "string"
                 },
-                "log-zap": {
-                    "description": "是否通过zap写入日志文件",
-                    "type": "boolean"
-                },
                 "max-idle-conns": {
                     "description": "空闲中的最大连接数",
                     "type": "integer"
@@ -14007,10 +13853,6 @@ const docTemplate = `{
                 "log-mode": {
                     "description": "是否开启Gorm全局日志",
                     "type": "string"
-                },
-                "log-zap": {
-                    "description": "是否通过zap写入日志文件",
-                    "type": "boolean"
                 },
                 "max-idle-conns": {
                     "description": "空闲中的最大连接数",
@@ -14117,14 +13959,6 @@ const docTemplate = `{
                 "aliyun-oss": {
                     "$ref": "#/definitions/config.AliyunOSS"
                 },
-                "api-decrypt": {
-                    "description": "API 加解密过滤器配置",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/config.APIDecrypt"
-                        }
-                    ]
-                },
                 "app": {
                     "description": "应用身份（日志静态字段 node/app_id/env）",
                     "allOf": [
@@ -14143,9 +13977,6 @@ const docTemplate = `{
                 },
                 "aws-s3": {
                     "$ref": "#/definitions/config.AwsS3"
-                },
-                "captcha": {
-                    "$ref": "#/definitions/config.Captcha"
                 },
                 "cloudflare-r2": {
                     "$ref": "#/definitions/config.CloudflareR2"
@@ -14172,9 +14003,6 @@ const docTemplate = `{
                 },
                 "email": {
                     "$ref": "#/definitions/github_com_flipped-aurora_gin-vue-admin_server_config.Email"
-                },
-                "excel": {
-                    "$ref": "#/definitions/config.Excel"
                 },
                 "hua-wei-obs": {
                     "$ref": "#/definitions/config.HuaWeiObs"
@@ -14280,10 +14108,6 @@ const docTemplate = `{
                     "description": "是否开启Gorm全局日志",
                     "type": "string"
                 },
-                "log-zap": {
-                    "description": "是否通过zap写入日志文件",
-                    "type": "boolean"
-                },
                 "max-idle-conns": {
                     "description": "空闲中的最大连接数",
                     "type": "integer"
@@ -14344,10 +14168,6 @@ const docTemplate = `{
                 "log-mode": {
                     "description": "是否开启Gorm全局日志",
                     "type": "string"
-                },
-                "log-zap": {
-                    "description": "是否通过zap写入日志文件",
-                    "type": "boolean"
                 },
                 "max-idle-conns": {
                     "description": "空闲中的最大连接数",
@@ -15355,9 +15175,6 @@ const docTemplate = `{
                 },
                 "email": {
                     "type": "string"
-                },
-                "enable": {
-                    "type": "integer"
                 },
                 "keyword": {
                     "description": "关键字",

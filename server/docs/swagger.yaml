@@ -2,28 +2,6 @@ definitions:
   common.JSONMap:
     additionalProperties: {}
     type: object
-  config.APIDecrypt:
-    properties:
-      always-encrypt-paths:
-        description: 始终加密的路径 (如登录),无需注解默认走加密。
-        items:
-          type: string
-        type: array
-      enabled:
-        description: Enabled 是否启用加解密过滤器;关闭后中间件直接放行。
-        type: boolean
-      header-flag:
-        description: HeaderFlag 传递加密 AES key 的请求/响应头名称,默认 encrypt-key。
-        type: string
-      private-key:
-        description: PrivateKey RSA 私钥 (PEM),用于解密请求中的 AES key。
-        type: string
-      public-key:
-        description: |-
-          PublicKey RSA 公钥 (PEM),用于加密响应 AES key。
-          客户端持有对应私钥或与前端共享的对称密钥约定。
-        type: string
-    type: object
   config.AliyunOSS:
     properties:
       access-key-id:
@@ -107,24 +85,6 @@ definitions:
       expose-headers:
         type: string
     type: object
-  config.Captcha:
-    properties:
-      img-height:
-        description: 验证码高度
-        type: integer
-      img-width:
-        description: 验证码宽度
-        type: integer
-      key-long:
-        description: 验证码长度
-        type: integer
-      open-captcha:
-        description: 防爆破验证码开启此数，0代表每次登录都需要验证码，其他数字代表错误密码次数，如3代表错误三次后出现验证码
-        type: integer
-      open-captcha-timeout:
-        description: 防爆破验证码超时时间，单位：s(秒)
-        type: integer
-    type: object
   config.CloudflareR2:
     properties:
       access-key-id:
@@ -143,11 +103,6 @@ definitions:
   config.DiskList:
     properties:
       mount-point:
-        type: string
-    type: object
-  config.Excel:
-    properties:
-      dir:
         type: string
     type: object
   config.HuaWeiObs:
@@ -195,23 +150,13 @@ definitions:
         type: string
       base_url:
         type: string
-      message_path:
-        type: string
       name:
         type: string
       path:
         type: string
       request_timeout:
         type: integer
-      separate:
-        type: boolean
-      sse_path:
-        description: Deprecated fields kept for backward compatibility with older
-          configs.
-        type: string
       upstream_base_url:
-        type: string
-      url_prefix:
         type: string
       version:
         type: string
@@ -313,9 +258,6 @@ definitions:
       log-mode:
         description: 是否开启Gorm全局日志
         type: string
-      log-zap:
-        description: 是否通过zap写入日志文件
-        type: boolean
       max-idle-conns:
         description: 空闲中的最大连接数
         type: integer
@@ -359,9 +301,6 @@ definitions:
       log-mode:
         description: 是否开启Gorm全局日志
         type: string
-      log-zap:
-        description: 是否通过zap写入日志文件
-        type: boolean
       max-idle-conns:
         description: 空闲中的最大连接数
         type: integer
@@ -405,9 +344,6 @@ definitions:
       log-mode:
         description: 是否开启Gorm全局日志
         type: string
-      log-zap:
-        description: 是否通过zap写入日志文件
-        type: boolean
       max-idle-conns:
         description: 空闲中的最大连接数
         type: integer
@@ -451,9 +387,6 @@ definitions:
       log-mode:
         description: 是否开启Gorm全局日志
         type: string
-      log-zap:
-        description: 是否通过zap写入日志文件
-        type: boolean
       max-idle-conns:
         description: 空闲中的最大连接数
         type: integer
@@ -530,10 +463,6 @@ definitions:
     properties:
       aliyun-oss:
         $ref: '#/definitions/config.AliyunOSS'
-      api-decrypt:
-        allOf:
-        - $ref: '#/definitions/config.APIDecrypt'
-        description: API 加解密过滤器配置
       app:
         allOf:
         - $ref: '#/definitions/config.App'
@@ -544,8 +473,6 @@ definitions:
         description: auto
       aws-s3:
         $ref: '#/definitions/config.AwsS3'
-      captcha:
-        $ref: '#/definitions/config.Captcha'
       cloudflare-r2:
         $ref: '#/definitions/config.CloudflareR2'
       cors:
@@ -562,8 +489,6 @@ definitions:
         type: array
       email:
         $ref: '#/definitions/github_com_flipped-aurora_gin-vue-admin_server_config.Email'
-      excel:
-        $ref: '#/definitions/config.Excel'
       hua-wei-obs:
         $ref: '#/definitions/config.HuaWeiObs'
       jwt:
@@ -631,9 +556,6 @@ definitions:
       log-mode:
         description: 是否开启Gorm全局日志
         type: string
-      log-zap:
-        description: 是否通过zap写入日志文件
-        type: boolean
       max-idle-conns:
         description: 空闲中的最大连接数
         type: integer
@@ -679,9 +601,6 @@ definitions:
       log-mode:
         description: 是否开启Gorm全局日志
         type: string
-      log-zap:
-        description: 是否通过zap写入日志文件
-        type: boolean
       max-idle-conns:
         description: 空闲中的最大连接数
         type: integer
@@ -1396,8 +1315,6 @@ definitions:
         type: boolean
       email:
         type: string
-      enable:
-        type: integer
       keyword:
         description: 关键字
         type: string
@@ -8153,46 +8070,6 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: 获取字典列表(含字典项明细)
-      tags:
-      - SysDictionary
-  /sysDictionary/getSysDictionaryPage:
-    get:
-      consumes:
-      - application/json
-      parameters:
-      - description: 关键字
-        in: query
-        name: keyword
-        type: string
-      - description: 字典名（中）
-        in: query
-        name: name
-        type: string
-      - description: 页码
-        in: query
-        name: page
-        type: integer
-      - description: 每页大小
-        in: query
-        name: pageSize
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: 分页获取SysDictionary列表,返回包括列表,总数,页码,每页数量
-          schema:
-            allOf:
-            - $ref: '#/definitions/response.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/response.PageResult'
-                msg:
-                  type: string
-              type: object
-      security:
-      - ApiKeyAuth: []
-      summary: 分页获取SysDictionary列表
       tags:
       - SysDictionary
   /sysDictionary/importSysDictionary:
