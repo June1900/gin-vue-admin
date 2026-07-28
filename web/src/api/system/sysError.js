@@ -43,7 +43,7 @@ export const deleteSysErrorByIds = (params) => {
   return service({
     url: '/sysError/deleteSysErrorByIds',
     method: 'delete',
-    params
+    data: { IDs: params.IDs.map(id => String(id)) }
   })
 }
 

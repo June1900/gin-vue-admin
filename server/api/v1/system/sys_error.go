@@ -73,8 +73,19 @@ func (sysErrorApi *SysErrorApi) DeleteSysErrorByIds(c *gin.Context) {
 	// 创建业务用Context
 	ctx := c.Request.Context()
 
-	IDs := c.QueryArray("IDs[]")
-	err := sysErrorService.DeleteSysErrorByIds(ctx, IDs)
+	type req struct {
+		IDs []string `json:"IDs"`
+	}
+	var params req
+	if err := c.ShouldBindJSON(&params); err != nil {
+		response.FailWithMessage("参数错误，请传入ID数组", c)
+		return
+	}
+	if len(params.IDs) == 0 {
+		response.FailWithMessage("未选择要删除的数据", c)
+		return
+	}
+	err := sysErrorService.DeleteSysErrorByIds(ctx, params.IDs)
 	if err != nil {
 		logger.WithCtx(c.Request.Context()).Mod("biz").Err(err).Error("批量删除失败!")
 		response.FailWithMessage("批量删除失败:"+err.Error(), c)
