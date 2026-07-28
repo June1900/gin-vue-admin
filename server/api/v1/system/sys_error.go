@@ -136,13 +136,13 @@ func (sysErrorApi *SysErrorApi) FindSysError(c *gin.Context) {
 	ctx := c.Request.Context()
 
 	ID := c.Query("ID")
-	resysError, err := sysErrorService.GetSysError(ctx, ID)
+	sysError, err := sysErrorService.GetSysError(ctx, ID)
 	if err != nil {
 		logger.WithCtx(c.Request.Context()).Mod("biz").Err(err).Error("查询失败!")
 		response.FailWithMessage("查询失败:"+err.Error(), c)
 		return
 	}
-	response.OkWithData(resysError, c)
+	response.OkWithData(sysError, c)
 }
 
 // GetSysErrorList 分页获取错误日志列表
