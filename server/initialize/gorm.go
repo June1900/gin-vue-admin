@@ -7,6 +7,7 @@ import (
 	"github.com/flipped-aurora/gin-vue-admin/server/model/example"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/media"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/system"
+	systemService "github.com/flipped-aurora/gin-vue-admin/server/service/system"
 	"github.com/flipped-aurora/gin-vue-admin/server/utils/logger"
 
 	"gorm.io/gorm"
@@ -75,6 +76,13 @@ func RegisterTables() {
 		system.SysTimedTask{},
 		system.SysTimedTaskLog{},
 
+		// menu_v2 模块: 启动即同步表结构
+		system.SysMenuV2BaseMenu{},
+		system.SysMenuV2BaseMenuParameter{},
+		system.SysMenuV2BaseMenuBtn{},
+		system.SysMenuV2AuthorityMenu{},
+		system.SysMenuV2AuthorityBtn{},
+
 		example.ExaCustomer{},
 		media.MediaUpload{},
 		media.MediaUploadChunk{},
@@ -92,6 +100,12 @@ func RegisterTables() {
 		logger.Bg().Mod("system").Err(err).Error("register biz_table failed")
 		os.Exit(1)
 	}
+
+	// menu_v2 模块: 启动即写入默认菜单树与角色关联(幂等, 失败不阻断启动)
+	if err = systemService.SeedMenuV2InitialData(); err != nil {
+		logger.Bg().Mod("system").Err(err).Error("seed menu_v2 initial data failed")
+	}
+
 	ensureLogViewerMetadata()
 	logger.Bg().Mod("system").Info("register table success")
 }

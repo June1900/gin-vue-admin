@@ -4,11 +4,13 @@ type ServiceGroup struct {
 	JwtService
 	ApiService
 	MenuService
+	MenuV2MenuService
 	UserService
 	CasbinService
 	InitDBService
 	AutoCodeService
 	BaseMenuService
+	MenuV2BaseMenuService
 	AuthorityService
 	SysDepartmentService
 	SysPositionService

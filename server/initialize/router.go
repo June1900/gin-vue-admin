@@ -78,9 +78,11 @@ func Routers() *gin.Engine {
 
 	{
 		// 健康监测
-		PublicGroup.GET("/health", func(c *gin.Context) {
-			c.JSON(http.StatusOK, "ok")
-		})
+		PublicGroup.GET(
+			"/health", func(c *gin.Context) {
+				c.JSON(http.StatusOK, "ok")
+			},
+		)
 	}
 	{
 		systemRouter.InitBaseRouter(PublicGroup) // 注册基础功能路由 不做鉴权
@@ -92,6 +94,7 @@ func Routers() *gin.Engine {
 		systemRouter.InitJwtRouter(PrivateGroup)                            // jwt相关路由
 		systemRouter.InitUserRouter(PrivateGroup)                           // 注册用户路由
 		systemRouter.InitMenuRouter(PrivateGroup)                           // 注册menu路由
+		systemRouter.InitMenuV2MenuRouter(PrivateGroup)                     // 注册 v2 menu路由
 		systemRouter.InitSystemRouter(PrivateGroup)                         // system相关路由
 		systemRouter.InitSysVersionRouter(PrivateGroup)                     // 发版相关路由
 		systemRouter.InitCasbinRouter(PrivateGroup)                         // 权限相关路由
