@@ -31,9 +31,9 @@
       </div>
       <el-table :data="tableData" row-key="ID" :default-sort="{ prop: 'ID', order: 'descending' }" @sort-change="sortChange">
         <el-table-column align="center" label="ID" width="80" prop="ID" sortable="custom" />
-        <el-table-column align="left" label="头像" min-width="75">
+        <el-table-column align="center" label="头像" min-width="75">
           <template #default="scope">
-            <CustomPic style="margin-top: 8px" :pic-src="scope.row.headerImg" />
+            <CustomPic style="margin: 0" :pic-src="scope.row.headerImg" />
           </template>
         </el-table-column>
         <el-table-column
@@ -60,7 +60,7 @@
           min-width="180"
           prop="email"
         />
-        <el-table-column align="left" label="用户角色" min-width="200">
+        <el-table-column align="left" label="用户角色" width="200">
           <template #default="scope">
             <el-cascader
               v-model="scope.row.authorityIds"
