@@ -1,4 +1,4 @@
-// server/initialize/timed_task.go
+// Package initialize server/initialize/timed_task.go
 package initialize
 
 import (
