@@ -12,59 +12,59 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type MenuV2AuthorityMenuApi struct{}
+type AuthorityMenuApi struct{}
 
 // GetMenu
-// @Tags      MenuV2AuthorityMenu
+// @Tags      AuthorityMenu
 // @Summary   获取用户动态路由
 // @Security  ApiKeyAuth
 // @Produce   application/json
 // @Param     data  body      request.Empty                                                  true  "空"
-// @Success   200   {object}  response.Response{data=systemRes.SysMenuV2MenusResponse,msg=string}  "获取用户动态路由,返回包括系统菜单详情列表"
-// @Router    /v2/menu/getMenu [post]
-func (a *MenuV2AuthorityMenuApi) GetMenu(c *gin.Context) {
-	menus, err := menuV2MenuService.GetMenuTree(c.Request.Context(), utils.GetUserAuthorityId(c))
+// @Success   200   {object}  response.Response{data=systemRes.SysMenusV2Response,msg=string}  "获取用户动态路由,返回包括系统菜单详情列表"
+// @Router    /menu/getMenu [post]
+func (a *AuthorityMenuApi) GetMenu(c *gin.Context) {
+	menus, err := menuService.GetMenuTree(c.Request.Context(), utils.GetUserAuthorityId(c))
 	if err != nil {
 		logger.WithCtx(c.Request.Context()).Mod("biz").Err(err).Error("获取失败!")
 		response.FailWithMessage("获取失败", c)
 		return
 	}
 	if menus == nil {
-		menus = []system.SysMenuV2Menu{}
+		menus = []system.SysMenuV2{}
 	}
-	response.OkWithDetailed(systemRes.SysMenuV2MenusResponse{Menus: menus}, "获取成功", c)
+	response.OkWithDetailed(systemRes.SysMenusV2Response{Menus: menus}, "获取成功", c)
 }
 
 // GetBaseMenuTree
-// @Tags      MenuV2AuthorityMenu
+// @Tags      AuthorityMenu
 // @Summary   获取用户动态路由
 // @Security  ApiKeyAuth
 // @Produce   application/json
-// @Param     data  body      request.Empty                                                          true  "空"
-// @Success   200   {object}  response.Response{data=systemRes.SysMenuV2BaseMenusResponse,msg=string}  "获取用户动态路由,返回包括系统菜单列表"
-// @Router    /v2/menu/getBaseMenuTree [post]
-func (a *MenuV2AuthorityMenuApi) GetBaseMenuTree(c *gin.Context) {
+// @Param     data  body      request.Empty                                                      true  "空"
+// @Success   200   {object}  response.Response{data=systemRes.SysBaseMenusV2Response,msg=string}  "获取用户动态路由,返回包括系统菜单列表"
+// @Router    /menu/getBaseMenuTree [post]
+func (a *AuthorityMenuApi) GetBaseMenuTree(c *gin.Context) {
 	authority := utils.GetUserAuthorityId(c)
-	menus, err := menuV2MenuService.GetBaseMenuTree(c.Request.Context(), authority)
+	menus, err := menuService.GetBaseMenuTree(c.Request.Context(), authority)
 	if err != nil {
 		logger.WithCtx(c.Request.Context()).Mod("biz").Err(err).Error("获取失败!")
 		response.FailWithMessage("获取失败", c)
 		return
 	}
-	response.OkWithDetailed(systemRes.SysMenuV2BaseMenusResponse{Menus: menus}, "获取成功", c)
+	response.OkWithDetailed(systemRes.SysBaseMenusV2Response{Menus: menus}, "获取成功", c)
 }
 
 // AddMenuAuthority
-// @Tags      MenuV2AuthorityMenu
-// @Summary   增加 v2 menu和角色关联关系
+// @Tags      AuthorityMenu
+// @Summary   增加menu和角色关联关系
 // @Security  ApiKeyAuth
 // @accept    application/json
 // @Produce   application/json
-// @Param     data  body      systemReq.AddMenuV2MenuAuthorityInfo  true  "角色ID"
-// @Success   200   {object}  response.Response{msg=string}   "增加 v2 menu和角色关联关系"
-// @Router    /v2/menu/addMenuAuthority [post]
-func (a *MenuV2AuthorityMenuApi) AddMenuAuthority(c *gin.Context) {
-	var authorityMenu systemReq.AddMenuV2MenuAuthorityInfo
+// @Param     data  body      systemReq.AddMenuAuthorityInfoV2  true  "角色ID"
+// @Success   200   {object}  response.Response{msg=string}   "增加menu和角色关联关系"
+// @Router    /menu/addMenuAuthority [post]
+func (a *AuthorityMenuApi) AddMenuAuthority(c *gin.Context) {
+	var authorityMenu systemReq.AddMenuAuthorityInfoV2
 	err := c.ShouldBindJSON(&authorityMenu)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)
@@ -75,9 +75,7 @@ func (a *MenuV2AuthorityMenuApi) AddMenuAuthority(c *gin.Context) {
 		return
 	}
 	adminAuthorityID := utils.GetUserAuthorityId(c)
-	if err := menuV2MenuService.AddMenuAuthority(
-		c.Request.Context(), authorityMenu.Menus, adminAuthorityID, authorityMenu.AuthorityId,
-	); err != nil {
+	if err := menuService.AddMenuAuthority(c.Request.Context(), authorityMenu.Menus, adminAuthorityID, authorityMenu.AuthorityId); err != nil {
 		logger.WithCtx(c.Request.Context()).Mod("biz").Err(err).Error("添加失败!")
 		response.FailWithMessage("添加失败", c)
 	} else {
@@ -86,15 +84,15 @@ func (a *MenuV2AuthorityMenuApi) AddMenuAuthority(c *gin.Context) {
 }
 
 // GetMenuAuthority
-// @Tags      MenuV2AuthorityMenu
-// @Summary   获取指定角色 v2 menu
+// @Tags      AuthorityMenu
+// @Summary   获取指定角色menu
 // @Security  ApiKeyAuth
 // @accept    application/json
 // @Produce   application/json
 // @Param     data  body      request.GetAuthorityId                                     true  "角色ID"
-// @Success   200   {object}  response.Response{data=map[string]interface{},msg=string}  "获取指定角色 v2 menu"
-// @Router    /v2/menu/getMenuAuthority [post]
-func (a *MenuV2AuthorityMenuApi) GetMenuAuthority(c *gin.Context) {
+// @Success   200   {object}  response.Response{data=map[string]interface{},msg=string}  "获取指定角色menu"
+// @Router    /menu/getMenuAuthority [post]
+func (a *AuthorityMenuApi) GetMenuAuthority(c *gin.Context) {
 	var param request.GetAuthorityId
 	err := c.ShouldBindJSON(&param)
 	if err != nil {
@@ -106,26 +104,26 @@ func (a *MenuV2AuthorityMenuApi) GetMenuAuthority(c *gin.Context) {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	menus, err := menuV2MenuService.GetMenuAuthority(c.Request.Context(), &param)
+	menus, err := menuService.GetMenuAuthority(c.Request.Context(), &param)
 	if err != nil {
 		logger.WithCtx(c.Request.Context()).Mod("biz").Err(err).Error("获取失败!")
-		response.FailWithDetailed(systemRes.SysMenuV2MenusResponse{Menus: menus}, "获取失败", c)
+		response.FailWithDetailed(systemRes.SysMenusV2Response{Menus: menus}, "获取失败", c)
 		return
 	}
 	response.OkWithDetailed(gin.H{"menus": menus}, "获取成功", c)
 }
 
 // AddBaseMenu
-// @Tags      MenuV2Menu
-// @Summary   新增 v2 菜单
+// @Tags      Menu
+// @Summary   新增菜单
 // @Security  ApiKeyAuth
 // @accept    application/json
 // @Produce   application/json
-// @Param     data  body      system.SysMenuV2BaseMenu         true  "路由path, 父菜单ID, 路由name, 对应前端文件路径, 排序标记"
-// @Success   200   {object}  response.Response{msg=string}  "新增 v2 菜单"
-// @Router    /v2/menu/addBaseMenu [post]
-func (a *MenuV2AuthorityMenuApi) AddBaseMenu(c *gin.Context) {
-	var menu system.SysMenuV2BaseMenu
+// @Param     data  body      system.SysBaseMenu             true  "路由path, 父菜单ID, 路由name, 对应前端文件路径, 排序标记"
+// @Success   200   {object}  response.Response{msg=string}  "新增菜单"
+// @Router    /menu/addBaseMenu [post]
+func (a *AuthorityMenuApi) AddBaseMenu(c *gin.Context) {
+	var menu system.SysBaseMenuV2
 	err := c.ShouldBindJSON(&menu)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)
@@ -141,7 +139,7 @@ func (a *MenuV2AuthorityMenuApi) AddBaseMenu(c *gin.Context) {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	err = menuV2MenuService.AddBaseMenu(c.Request.Context(), menu)
+	err = menuService.AddBaseMenu(c.Request.Context(), menu)
 	if err != nil {
 		logger.WithCtx(c.Request.Context()).Mod("biz").Err(err).Error("添加失败!")
 		response.FailWithMessage("添加失败："+err.Error(), c)
@@ -151,15 +149,15 @@ func (a *MenuV2AuthorityMenuApi) AddBaseMenu(c *gin.Context) {
 }
 
 // DeleteBaseMenu
-// @Tags      MenuV2Menu
-// @Summary   删除 v2 菜单
+// @Tags      Menu
+// @Summary   删除菜单
 // @Security  ApiKeyAuth
 // @accept    application/json
 // @Produce   application/json
 // @Param     data  body      request.GetById                true  "菜单id"
-// @Success   200   {object}  response.Response{msg=string}  "删除 v2 菜单"
-// @Router    /v2/menu/deleteBaseMenu [post]
-func (a *MenuV2AuthorityMenuApi) DeleteBaseMenu(c *gin.Context) {
+// @Success   200   {object}  response.Response{msg=string}  "删除菜单"
+// @Router    /menu/deleteBaseMenu [post]
+func (a *AuthorityMenuApi) DeleteBaseMenu(c *gin.Context) {
 	var menu request.GetById
 	err := c.ShouldBindJSON(&menu)
 	if err != nil {
@@ -171,7 +169,7 @@ func (a *MenuV2AuthorityMenuApi) DeleteBaseMenu(c *gin.Context) {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	err = menuV2BaseMenuService.DeleteBaseMenu(c.Request.Context(), menu.ID)
+	err = baseMenuService.DeleteBaseMenu(c.Request.Context(), menu.ID)
 	if err != nil {
 		logger.WithCtx(c.Request.Context()).Mod("biz").Err(err).Error("删除失败!")
 		response.FailWithMessage("删除失败:"+err.Error(), c)
@@ -181,16 +179,16 @@ func (a *MenuV2AuthorityMenuApi) DeleteBaseMenu(c *gin.Context) {
 }
 
 // UpdateBaseMenu
-// @Tags      MenuV2Menu
-// @Summary   更新 v2 菜单
+// @Tags      Menu
+// @Summary   更新菜单
 // @Security  ApiKeyAuth
 // @accept    application/json
 // @Produce   application/json
-// @Param     data  body      system.SysMenuV2BaseMenu         true  "路由path, 父菜单ID, 路由name, 对应前端文件路径, 排序标记"
-// @Success   200   {object}  response.Response{msg=string}  "更新 v2 菜单"
-// @Router    /v2/menu/updateBaseMenu [post]
-func (a *MenuV2AuthorityMenuApi) UpdateBaseMenu(c *gin.Context) {
-	var menu system.SysMenuV2BaseMenu
+// @Param     data  body      system.SysBaseMenuV2            true  "路由path, 父菜单ID, 路由name, 对应前端文件路径, 排序标记"
+// @Success   200   {object}  response.Response{msg=string}  "更新菜单"
+// @Router    /menu/updateBaseMenu [post]
+func (a *AuthorityMenuApi) UpdateBaseMenu(c *gin.Context) {
+	var menu system.SysBaseMenuV2
 	err := c.ShouldBindJSON(&menu)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)
@@ -206,7 +204,7 @@ func (a *MenuV2AuthorityMenuApi) UpdateBaseMenu(c *gin.Context) {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	err = menuV2BaseMenuService.UpdateBaseMenu(c.Request.Context(), menu)
+	err = baseMenuService.UpdateBaseMenu(c.Request.Context(), menu)
 	if err != nil {
 		logger.WithCtx(c.Request.Context()).Mod("biz").Err(err).Error("更新失败!")
 		response.FailWithMessage("更新失败", c)
@@ -216,15 +214,15 @@ func (a *MenuV2AuthorityMenuApi) UpdateBaseMenu(c *gin.Context) {
 }
 
 // GetBaseMenuById
-// @Tags      MenuV2Menu
-// @Summary   根据id获取 v2 菜单
+// @Tags      Menu
+// @Summary   根据id获取菜单
 // @Security  ApiKeyAuth
 // @accept    application/json
 // @Produce   application/json
-// @Param     data  body      request.GetById                                                       true  "菜单id"
-// @Success   200   {object}  response.Response{data=systemRes.SysMenuV2BaseMenuResponse,msg=string}  "根据id获取 v2 菜单,返回包括系统菜单列表"
-// @Router    /v2/menu/getBaseMenuById [post]
-func (a *MenuV2AuthorityMenuApi) GetBaseMenuById(c *gin.Context) {
+// @Param     data  body      request.GetById                                                     true  "菜单id"
+// @Success   200   {object}  response.Response{data=systemRes.SysBaseMenuV2Response,msg=string}  "根据id获取菜单,返回包括系统菜单列表"
+// @Router    /menu/getBaseMenuById [post]
+func (a *AuthorityMenuApi) GetBaseMenuById(c *gin.Context) {
 	var idInfo request.GetById
 	err := c.ShouldBindJSON(&idInfo)
 	if err != nil {
@@ -236,26 +234,26 @@ func (a *MenuV2AuthorityMenuApi) GetBaseMenuById(c *gin.Context) {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	menu, err := menuV2BaseMenuService.GetBaseMenuById(c.Request.Context(), idInfo.ID)
+	menu, err := baseMenuService.GetBaseMenuById(c.Request.Context(), idInfo.ID)
 	if err != nil {
 		logger.WithCtx(c.Request.Context()).Mod("biz").Err(err).Error("获取失败!")
 		response.FailWithMessage("获取失败", c)
 		return
 	}
-	response.OkWithDetailed(systemRes.SysMenuV2BaseMenuResponse{Menu: menu}, "获取成功", c)
+	response.OkWithDetailed(systemRes.SysBaseMenuV2Response{Menu: menu}, "获取成功", c)
 }
 
 // GetMenuRoles
-// @Tags      MenuV2AuthorityMenu
-// @Summary   获取拥有指定 v2 菜单的角色ID列表
+// @Tags      AuthorityMenu
+// @Summary   获取拥有指定菜单的角色ID列表
 // @Security  ApiKeyAuth
 // @accept    application/json
 // @Produce   application/json
-// @Param     menuId  query     uint                                                             true  "菜单ID"
+// @Param     menuId  query     uint                                                         true  "菜单ID"
 // @Success   200     {object}  response.Response{data=map[string]interface{},msg=string}    "获取成功"
-// @Router    /v2/menu/getMenuRoles [get]
-func (a *MenuV2AuthorityMenuApi) GetMenuRoles(c *gin.Context) {
-	var req systemReq.SetMenuV2MenuAuthorities
+// @Router    /menu/getMenuRoles [get]
+func (a *AuthorityMenuApi) GetMenuRoles(c *gin.Context) {
+	var req systemReq.SetMenuAuthorities
 	if err := c.ShouldBindQuery(&req); err != nil {
 		response.FailWithMessage(err.Error(), c)
 		return
@@ -264,7 +262,7 @@ func (a *MenuV2AuthorityMenuApi) GetMenuRoles(c *gin.Context) {
 		response.FailWithMessage("菜单ID不能为空", c)
 		return
 	}
-	authorityIds, err := menuV2MenuService.GetAuthoritiesByMenuId(c.Request.Context(), req.MenuId)
+	authorityIds, err := menuService.GetAuthoritiesByMenuId(c.Request.Context(), req.MenuId)
 	if err != nil {
 		logger.WithCtx(c.Request.Context()).Mod("biz").Err(err).Error("获取失败!")
 		response.FailWithMessage("获取失败"+err.Error(), c)
@@ -273,7 +271,7 @@ func (a *MenuV2AuthorityMenuApi) GetMenuRoles(c *gin.Context) {
 	if authorityIds == nil {
 		authorityIds = []uint{}
 	}
-	defaultRouterAuthorityIds, err := menuV2MenuService.GetDefaultRouterAuthorityIds(c.Request.Context(), req.MenuId)
+	defaultRouterAuthorityIds, err := menuService.GetDefaultRouterAuthorityIds(c.Request.Context(), req.MenuId)
 	if err != nil {
 		logger.WithCtx(c.Request.Context()).Mod("biz").Err(err).Error("获取首页角色失败!")
 		response.FailWithMessage("获取失败"+err.Error(), c)
@@ -282,25 +280,23 @@ func (a *MenuV2AuthorityMenuApi) GetMenuRoles(c *gin.Context) {
 	if defaultRouterAuthorityIds == nil {
 		defaultRouterAuthorityIds = []uint{}
 	}
-	response.OkWithDetailed(
-		gin.H{
-			"authorityIds":              authorityIds,
-			"defaultRouterAuthorityIds": defaultRouterAuthorityIds,
-		}, "获取成功", c,
-	)
+	response.OkWithDetailed(gin.H{
+		"authorityIds":              authorityIds,
+		"defaultRouterAuthorityIds": defaultRouterAuthorityIds,
+	}, "获取成功", c)
 }
 
 // SetMenuRoles
-// @Tags      MenuV2AuthorityMenu
-// @Summary   全量覆盖某 v2 菜单关联的角色列表
+// @Tags      AuthorityMenu
+// @Summary   全量覆盖某菜单关联的角色列表
 // @Security  ApiKeyAuth
 // @accept    application/json
 // @Produce   application/json
-// @Param     data  body      systemReq.SetMenuV2MenuAuthorities   true  "菜单ID和角色ID列表"
+// @Param     data  body      systemReq.SetMenuAuthorities   true  "菜单ID和角色ID列表"
 // @Success   200   {object}  response.Response{msg=string}  "设置成功"
-// @Router    /v2/menu/setMenuRoles [post]
-func (a *MenuV2AuthorityMenuApi) SetMenuRoles(c *gin.Context) {
-	var req systemReq.SetMenuV2MenuAuthorities
+// @Router    /menu/setMenuRoles [post]
+func (a *AuthorityMenuApi) SetMenuRoles(c *gin.Context) {
+	var req systemReq.SetMenuAuthorities
 	if err := c.ShouldBindJSON(&req); err != nil {
 		response.FailWithMessage(err.Error(), c)
 		return
@@ -309,7 +305,7 @@ func (a *MenuV2AuthorityMenuApi) SetMenuRoles(c *gin.Context) {
 		response.FailWithMessage("菜单ID不能为空", c)
 		return
 	}
-	if err := menuV2MenuService.SetMenuAuthorities(c.Request.Context(), req.MenuId, req.AuthorityIds); err != nil {
+	if err := menuService.SetMenuAuthorities(c.Request.Context(), req.MenuId, req.AuthorityIds); err != nil {
 		logger.WithCtx(c.Request.Context()).Mod("biz").Err(err).Error("设置失败!")
 		response.FailWithMessage("设置失败"+err.Error(), c)
 		return
@@ -318,17 +314,17 @@ func (a *MenuV2AuthorityMenuApi) SetMenuRoles(c *gin.Context) {
 }
 
 // GetMenuList
-// @Tags      MenuV2Menu
-// @Summary   分页获取 v2 基础menu列表
+// @Tags      Menu
+// @Summary   分页获取基础menu列表
 // @Security  ApiKeyAuth
 // @accept    application/json
 // @Produce   application/json
 // @Param     data  body      request.PageInfo                                        true  "页码, 每页大小"
-// @Success   200   {object}  response.Response{data=response.PageResult,msg=string}  "分页获取 v2 基础menu列表,返回包括列表,总数,页码,每页数量"
-// @Router    /v2/menu/getMenuList [post]
-func (a *MenuV2AuthorityMenuApi) GetMenuList(c *gin.Context) {
+// @Success   200   {object}  response.Response{data=response.PageResult,msg=string}  "分页获取基础menu列表,返回包括列表,总数,页码,每页数量"
+// @Router    /menu/getMenuList [post]
+func (a *AuthorityMenuApi) GetMenuList(c *gin.Context) {
 	authorityID := utils.GetUserAuthorityId(c)
-	menuList, err := menuV2MenuService.GetInfoList(c.Request.Context(), authorityID)
+	menuList, err := menuService.GetInfoList(c.Request.Context(), authorityID)
 	if err != nil {
 		logger.WithCtx(c.Request.Context()).Mod("biz").Err(err).Error("获取失败!")
 		response.FailWithMessage("获取失败", c)

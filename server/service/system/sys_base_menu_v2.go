@@ -10,16 +10,22 @@ import (
 	"gorm.io/gorm"
 )
 
-type MenuV2BaseMenuService struct{}
+type BaseMenuV2Service struct{}
 
-var MenuV2BaseMenuServiceApp = new(MenuV2BaseMenuService)
+//@author: [piexlmax]
+//@function: DeleteBaseMenu
+//@description: 删除基础路由
+//@param: id float64
+//@return: err error
 
-func (s *MenuV2BaseMenuService) DeleteBaseMenu(ctx context.Context, id int) (err error) {
-	err = global.GVA_DB.WithContext(ctx).First(&system.SysMenuV2BaseMenu{}, "parent_id = ?", id).Error
+var BaseMenuV2ServiceApp = new(BaseMenuV2Service)
+
+func (baseMenuService *BaseMenuV2Service) DeleteBaseMenu(ctx context.Context, id int) (err error) {
+	err = global.GVA_DB.WithContext(ctx).First(&system.SysBaseMenuV2{}, "parent_id = ?", id).Error
 	if err == nil {
 		return errors.New("此菜单存在子菜单不可删除")
 	}
-	var menu system.SysMenuV2BaseMenu
+	var menu system.SysBaseMenuV2
 	err = global.GVA_DB.WithContext(ctx).First(&menu, id).Error
 	if err != nil {
 		return errors.New("记录不存在")
@@ -30,26 +36,27 @@ func (s *MenuV2BaseMenuService) DeleteBaseMenu(ctx context.Context, id int) (err
 	}
 	return global.GVA_DB.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 
-		err = tx.Delete(&system.SysMenuV2BaseMenu{}, "id = ?", id).Error
+		err = tx.Delete(&system.SysBaseMenuV2{}, "id = ?", id).Error
 		if err != nil {
 			return err
 		}
 
-		err = tx.Delete(&system.SysMenuV2BaseMenuParameter{}, "sys_base_menu_id = ?", id).Error
+		err = tx.Delete(&system.SysBaseMenuV2Parameter{}, "sys_base_menu_id = ?", id).Error
 		if err != nil {
 			return err
 		}
 
-		err = tx.Delete(&system.SysMenuV2BaseMenuBtn{}, "sys_base_menu_id = ?", id).Error
+		err = tx.Delete(&system.SysBaseMenuBtn{}, "sys_base_menu_id = ?", id).Error
 		if err != nil {
 			return err
 		}
-		err = tx.Delete(&system.SysMenuV2AuthorityBtn{}, "sys_menu_id = ?", id).Error
+		err = tx.Delete(&system.SysAuthorityBtn{}, "sys_menu_id = ?", id).Error
 		if err != nil {
 			return err
 		}
 
-		err = tx.Delete(&system.SysMenuV2AuthorityMenu{}, "sys_base_menu_id = ?", id).Error
+		// V2 菜单的权限关联记录在独立的 sys_authority_menus_v2 表
+		err = tx.Delete(&system.SysAuthorityMenuV2{}, "sys_base_menu_id = ?", id).Error
 		if err != nil {
 			return err
 		}
@@ -58,37 +65,43 @@ func (s *MenuV2BaseMenuService) DeleteBaseMenu(ctx context.Context, id int) (err
 
 }
 
-func (s *MenuV2BaseMenuService) UpdateBaseMenu(ctx context.Context, menu system.SysMenuV2BaseMenu) (err error) {
-	var oldMenu system.SysMenuV2BaseMenu
+//@author: [piexlmax]
+//@function: UpdateBaseMenu
+//@description: 更新路由
+//@param: menu system.SysBaseMenuV2
+//@return: err error
+
+func (baseMenuService *BaseMenuV2Service) UpdateBaseMenu(ctx context.Context, menu system.SysBaseMenuV2) (err error) {
+	var oldMenu system.SysBaseMenuV2
 	upDateMap := make(map[string]interface{})
-	upDateMap["keep_alive"] = menu.KeepAlive
-	upDateMap["transition_type"] = menu.TransitionType
-	upDateMap["close_tab"] = menu.CloseTab
-	upDateMap["default_menu"] = menu.DefaultMenu
+	upDateMap["keep_alive"] = menu.Meta.KeepAlive
+	upDateMap["transition_type"] = menu.Meta.TransitionType
+	upDateMap["close_tab"] = menu.Meta.CloseTab
+	upDateMap["default_menu"] = menu.Meta.DefaultMenu
 	upDateMap["parent_id"] = menu.ParentId
 	upDateMap["path"] = menu.Path
 	upDateMap["name"] = menu.Name
 	upDateMap["hidden"] = menu.Hidden
 	upDateMap["component"] = menu.Component
-	upDateMap["title"] = menu.Title
-	upDateMap["active_name"] = menu.ActiveName
-	upDateMap["icon"] = menu.Icon
+	upDateMap["title"] = menu.Meta.Title
+	upDateMap["active_name"] = menu.Meta.ActiveName
+	upDateMap["icon"] = menu.Meta.Icon
 	upDateMap["sort"] = menu.Sort
 
 	err = global.GVA_DB.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		tx.Where("id = ?", menu.ID).Find(&oldMenu)
 		if oldMenu.Name != menu.Name {
-			if !errors.Is(tx.Where("id <> ? AND name = ?", menu.ID, menu.Name).First(&system.SysMenuV2BaseMenu{}).Error, gorm.ErrRecordNotFound) {
+			if !errors.Is(tx.Where("id <> ? AND name = ?", menu.ID, menu.Name).First(&system.SysBaseMenuV2{}).Error, gorm.ErrRecordNotFound) {
 				logger.WithCtx(ctx).Mod("biz").Debug("存在相同name修改失败")
 				return errors.New("存在相同name修改失败")
 			}
 		}
-		txErr := tx.Unscoped().Delete(&system.SysMenuV2BaseMenuParameter{}, "sys_base_menu_id = ?", menu.ID).Error
+		txErr := tx.Unscoped().Delete(&system.SysBaseMenuV2Parameter{}, "sys_base_menu_id = ?", menu.ID).Error
 		if txErr != nil {
 			logger.WithCtx(ctx).Mod("biz").Debug(txErr.Error())
 			return txErr
 		}
-		txErr = tx.Unscoped().Delete(&system.SysMenuV2BaseMenuBtn{}, "sys_base_menu_id = ?", menu.ID).Error
+		txErr = tx.Unscoped().Delete(&system.SysBaseMenuBtn{}, "sys_base_menu_id = ?", menu.ID).Error
 		if txErr != nil {
 			logger.WithCtx(ctx).Mod("biz").Debug(txErr.Error())
 			return txErr
@@ -125,7 +138,13 @@ func (s *MenuV2BaseMenuService) UpdateBaseMenu(ctx context.Context, menu system.
 	return err
 }
 
-func (s *MenuV2BaseMenuService) GetBaseMenuById(ctx context.Context, id int) (menu system.SysMenuV2BaseMenu, err error) {
+//@author: [piexlmax]
+//@function: GetBaseMenuById
+//@description: 返回当前选中menu
+//@param: id float64
+//@return: menu system.SysBaseMenuV2, err error
+
+func (baseMenuService *BaseMenuV2Service) GetBaseMenuById(ctx context.Context, id int) (menu system.SysBaseMenuV2, err error) {
 	err = global.GVA_DB.WithContext(ctx).Preload("MenuBtn").Preload("Parameters").Where("id = ?", id).First(&menu).Error
 	return
 }

@@ -2,7 +2,7 @@ package system
 
 import (
 	api "github.com/flipped-aurora/gin-vue-admin/server/api/v1"
-	menuv2 "github.com/flipped-aurora/gin-vue-admin/server/api/v2"
+	apiv2 "github.com/flipped-aurora/gin-vue-admin/server/api/v2"
 )
 
 type RouterGroup struct {
@@ -12,7 +12,7 @@ type RouterGroup struct {
 	BaseRouter
 	InitRouter
 	MenuRouter
-	MenuV2MenuRouter
+	MenuV2Router
 	UserRouter
 	CasbinRouter
 	AutoCodeRouter
@@ -37,33 +37,33 @@ type RouterGroup struct {
 }
 
 var (
-	dbApi                  = api.ApiGroupApp.SystemApiGroup.DBApi
-	jwtApi                 = api.ApiGroupApp.SystemApiGroup.JwtApi
-	baseApi                = api.ApiGroupApp.SystemApiGroup.BaseApi
-	casbinApi              = api.ApiGroupApp.SystemApiGroup.CasbinApi
-	systemApi              = api.ApiGroupApp.SystemApiGroup.SystemApi
-	sysParamsApi           = api.ApiGroupApp.SystemApiGroup.SysParamsApi
-	autoCodeApi            = api.ApiGroupApp.SystemApiGroup.AutoCodeApi
-	authorityApi           = api.ApiGroupApp.SystemApiGroup.AuthorityApi
-	departmentApi          = api.ApiGroupApp.SystemApiGroup.SysDepartmentApi
-	positionApi            = api.ApiGroupApp.SystemApiGroup.SysPositionApi
-	dataAccessLogApi       = api.ApiGroupApp.SystemApiGroup.SysDataAccessLogApi
-	apiRouterApi           = api.ApiGroupApp.SystemApiGroup.SystemApiApi
-	dictionaryApi          = api.ApiGroupApp.SystemApiGroup.DictionaryApi
-	authorityBtnApi        = api.ApiGroupApp.SystemApiGroup.AuthorityBtnApi
-	authorityMenuApi       = api.ApiGroupApp.SystemApiGroup.AuthorityMenuApi
-	menuV2AuthorityMenuApi = menuv2.MenuV2ApiGroupApp.SystemApiGroup.MenuV2AuthorityMenuApi
-	autoCodePluginApi      = api.ApiGroupApp.SystemApiGroup.AutoCodePluginApi
-	autocodeHistoryApi     = api.ApiGroupApp.SystemApiGroup.AutoCodeHistoryApi
-	operationRecordApi     = api.ApiGroupApp.SystemApiGroup.OperationRecordApi
-	autoCodePackageApi     = api.ApiGroupApp.SystemApiGroup.AutoCodePackageApi
-	dictionaryDetailApi    = api.ApiGroupApp.SystemApiGroup.DictionaryDetailApi
-	autoCodeTemplateApi    = api.ApiGroupApp.SystemApiGroup.AutoCodeTemplateApi
-	exportTemplateApi      = api.ApiGroupApp.SystemApiGroup.SysExportTemplateApi
-	sysVersionApi          = api.ApiGroupApp.SystemApiGroup.SysVersionApi
-	sysErrorApi            = api.ApiGroupApp.SystemApiGroup.SysErrorApi
-	skillsApi              = api.ApiGroupApp.SystemApiGroup.SkillsApi
-	securityConfigApi      = api.ApiGroupApp.SystemApiGroup.SecurityConfigApi
-	timedTaskApi           = api.ApiGroupApp.SystemApiGroup.TimedTaskApi
-	logViewerApi           = api.ApiGroupApp.SystemApiGroup.LogViewerApi
+	dbApi               = api.ApiGroupApp.SystemApiGroup.DBApi
+	jwtApi              = api.ApiGroupApp.SystemApiGroup.JwtApi
+	baseApi             = api.ApiGroupApp.SystemApiGroup.BaseApi
+	casbinApi           = api.ApiGroupApp.SystemApiGroup.CasbinApi
+	systemApi           = api.ApiGroupApp.SystemApiGroup.SystemApi
+	sysParamsApi        = api.ApiGroupApp.SystemApiGroup.SysParamsApi
+	autoCodeApi         = api.ApiGroupApp.SystemApiGroup.AutoCodeApi
+	authorityApi        = api.ApiGroupApp.SystemApiGroup.AuthorityApi
+	departmentApi       = api.ApiGroupApp.SystemApiGroup.SysDepartmentApi
+	positionApi         = api.ApiGroupApp.SystemApiGroup.SysPositionApi
+	dataAccessLogApi    = api.ApiGroupApp.SystemApiGroup.SysDataAccessLogApi
+	apiRouterApi        = api.ApiGroupApp.SystemApiGroup.SystemApiApi
+	dictionaryApi       = api.ApiGroupApp.SystemApiGroup.DictionaryApi
+	authorityBtnApi     = api.ApiGroupApp.SystemApiGroup.AuthorityBtnApi
+	authorityMenuApi    = api.ApiGroupApp.SystemApiGroup.AuthorityMenuApi
+	authorityMenuV2Api  = apiv2.ApiGroupApp.SystemApiGroup.AuthorityMenuApi
+	autoCodePluginApi   = api.ApiGroupApp.SystemApiGroup.AutoCodePluginApi
+	autocodeHistoryApi  = api.ApiGroupApp.SystemApiGroup.AutoCodeHistoryApi
+	operationRecordApi  = api.ApiGroupApp.SystemApiGroup.OperationRecordApi
+	autoCodePackageApi  = api.ApiGroupApp.SystemApiGroup.AutoCodePackageApi
+	dictionaryDetailApi = api.ApiGroupApp.SystemApiGroup.DictionaryDetailApi
+	autoCodeTemplateApi = api.ApiGroupApp.SystemApiGroup.AutoCodeTemplateApi
+	exportTemplateApi   = api.ApiGroupApp.SystemApiGroup.SysExportTemplateApi
+	sysVersionApi       = api.ApiGroupApp.SystemApiGroup.SysVersionApi
+	sysErrorApi         = api.ApiGroupApp.SystemApiGroup.SysErrorApi
+	skillsApi           = api.ApiGroupApp.SystemApiGroup.SkillsApi
+	securityConfigApi   = api.ApiGroupApp.SystemApiGroup.SecurityConfigApi
+	timedTaskApi        = api.ApiGroupApp.SystemApiGroup.TimedTaskApi
+	logViewerApi        = api.ApiGroupApp.SystemApiGroup.LogViewerApi
 )

@@ -11,6 +11,12 @@ type AddMenuAuthorityInfo struct {
 	AuthorityId uint                 `json:"authorityId"` // 角色ID
 }
 
+// AddMenuAuthorityInfoV2 V2 版本：菜单使用 SysBaseMenuV2
+type AddMenuAuthorityInfoV2 struct {
+	Menus       []system.SysBaseMenuV2 `json:"menus"`
+	AuthorityId uint                   `json:"authorityId"` // 角色ID
+}
+
 // SetMenuAuthorities 通过菜单ID全量覆盖关联角色列表
 type SetMenuAuthorities struct {
 	MenuId       uint   `json:"menuId" form:"menuId"`             // 菜单ID

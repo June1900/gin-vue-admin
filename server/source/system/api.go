@@ -364,10 +364,8 @@ func (i *initApi) DataInserted(ctx context.Context) bool {
 	if !ok {
 		return false
 	}
-	if errors.Is(
-		db.Where("path = ? AND method = ?", "/authorityBtn/canRemoveAuthorityBtn", "POST").
-			First(&sysModel.SysApi{}).Error, gorm.ErrRecordNotFound,
-	) {
+	if errors.Is(db.Where("path = ? AND method = ?", "/authorityBtn/canRemoveAuthorityBtn", "POST").
+		First(&sysModel.SysApi{}).Error, gorm.ErrRecordNotFound) {
 		return false
 	}
 	return true
