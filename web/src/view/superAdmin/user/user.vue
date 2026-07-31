@@ -273,6 +273,8 @@
             style="width: 100%"
             :options="authOptions"
             :show-all-levels="false"
+            collapse-tags
+            collapse-tags-tooltip
             :props="{
               multiple: true,
               checkStrictly: true,
@@ -749,5 +751,19 @@
 <style lang="scss">
   .header-img-box {
     @apply w-52 h-52 border border-solid border-gray-300 rounded-xl flex justify-center items-center cursor-pointer;
+  }
+
+  // 角色选择框：内容超出时保持单行显示，不换行
+  .el-cascader {
+    .el-input__wrapper {
+      height: 32px;
+      display: flex;
+      align-items: center;
+    }
+
+    .el-cascader__tags {
+      flex-wrap: nowrap;
+      overflow: hidden;
+    }
   }
 </style>

@@ -74,13 +74,13 @@
       </div>
     </div>
 
-    <el-drawer v-model="drawerVisible" size="400px" title="签发 API Token">
+    <el-drawer v-model="drawerVisible" size="500px" title="签发 API Token">
          <el-form ref="formRef" :model="form" label-width="80px">
              <el-form-item label="用户" required>
-                 <el-select 
-                    v-model="form.userId" 
-                    placeholder="请选择用户" 
-                    filterable 
+                 <el-select
+                    v-model="form.userId"
+                    placeholder="请选择用户"
+                    filterable
                     style="width:100%"
                     @change="handleUserChange"
                  >
@@ -137,13 +137,11 @@
     <el-drawer v-model="curlDrawerVisible" size="500px" title="Curl 示例">
         <div style="padding: 10px;">
             <p style="margin-bottom: 10px;">Header 方式:</p>
-            <el-input type="textarea" :rows="4" v-model="curlHeader" readonly />
+            <el-input type="textarea" :rows="4" autosize  v-model="curlHeader" readonly />
             <el-button style="margin-top: 5px;" size="small" @click="copyText(curlHeader)">复制</el-button>
-            
             <el-divider />
-            
             <p style="margin-bottom: 10px;">Cookie 方式:</p>
-            <el-input type="textarea" :rows="4" v-model="curlCookie" readonly />
+            <el-input type="textarea" :rows="4" autosize v-model="curlCookie" readonly />
             <el-button style="margin-top: 5px;" size="small" @click="copyText(curlCookie)">复制</el-button>
         </div>
     </el-drawer>
@@ -248,9 +246,9 @@ const openCurl = (row) => {
     const origin = window.location.origin
     // 构造示例 URL
     const url = `${origin}/api/menu/getMenu`
-    
+
     curlHeader.value = `curl -X POST "${url}" -H "x-token: ${row.token}" -H "Content-Type: application/json"`
-    
+
     curlCookie.value = `curl -X POST "${url}" -b "x-token=${row.token}" -H "Content-Type: application/json"`
 
     curlDrawerVisible.value = true

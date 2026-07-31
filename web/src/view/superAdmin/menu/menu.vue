@@ -9,10 +9,11 @@
 
       <!-- 由于此处菜单跟左侧列表一一对应所以不需要分页 pageSize默认999 -->
       <el-table :data="tableData" row-key="ID">
-        <el-table-column align="left" label="ID" min-width="100" prop="ID" />
+        <el-table-column align="center" label="ID" min-width="100" prop="ID" />
         <el-table-column
           align="left"
           label="展示名称"
+          show-overflow-tooltip
           min-width="120"
           prop="authorityName"
         >
@@ -61,51 +62,47 @@
         </el-table-column>
         <el-table-column
           align="left"
-          label="父节点"
-          min-width="90"
-          prop="parentId"
-        />
-        <el-table-column align="left" label="排序" min-width="70" prop="sort" />
-        <el-table-column
-          align="left"
           label="文件路径"
+          show-overflow-tooltip
           min-width="360"
           prop="component"
         />
-        <el-table-column align="left" fixed="right" label="操作" :min-width="appStore.operateMinWith">
+        <el-table-column align="center" fixed="right" label="操作" width="360">
           <template #default="scope">
-            <el-button
-              type="primary"
-              link
-              icon="plus"
-              @click="addMenu(scope.row.ID)"
-            >
-              添加子菜单
-            </el-button>
-            <el-button
-              type="primary"
-              link
-              icon="edit"
-              @click="editMenu(scope.row.ID)"
-            >
-              编辑
-            </el-button>
-            <el-button
-              type="primary"
-              link
-              icon="user"
-              @click="openAssignRoleDrawer(scope.row)"
-            >
-              分配角色
-            </el-button>
-            <el-button
-              type="primary"
-              link
-              icon="delete"
-              @click="deleteMenu(scope.row.ID)"
-            >
-              删除
-            </el-button>
+            <div style="white-space: nowrap">
+              <el-button
+                type="primary"
+                link
+                icon="plus"
+                @click="addMenu(scope.row.ID)"
+              >
+                添加子菜单
+              </el-button>
+              <el-button
+                type="primary"
+                link
+                icon="edit"
+                @click="editMenu(scope.row.ID)"
+              >
+                编辑
+              </el-button>
+              <el-button
+                type="primary"
+                link
+                icon="user"
+                @click="openAssignRoleDrawer(scope.row)"
+              >
+                分配角色
+              </el-button>
+              <el-button
+                type="primary"
+                link
+                icon="delete"
+                @click="deleteMenu(scope.row.ID)"
+              >
+                删除
+              </el-button>
+            </div>
           </template>
         </el-table-column>
       </el-table>
@@ -127,7 +124,7 @@
       </template>
 
       <warning-bar title="新增菜单，需要在角色管理内配置权限才可使用" />
-      
+
       <!-- 基础信息区域 -->
       <div class="border-b border-gray-200">
         <h3 class="font-semibold text-gray-700 mb-4">基础信息</h3>
@@ -163,9 +160,9 @@
           <el-row class="w-full" :gutter="16">
             <el-col :span="12">
               <el-form-item label="展示名称" prop="meta.title">
-                <el-input 
-                  v-model="form.meta.title" 
-                  autocomplete="off" 
+                <el-input
+                  v-model="form.meta.title"
+                  autocomplete="off"
                   placeholder="请输入菜单展示名称"
                 />
               </el-form-item>
@@ -183,7 +180,7 @@
           </el-row>
         </el-form>
       </div>
-       
+
       <!-- 路由配置区域 -->
       <div class="border-b border-gray-200 mt-2">
         <h3 class="font-semibold text-gray-700 mb-4">路由配置</h3>
@@ -237,7 +234,7 @@
            </el-row>
         </el-form>
       </div>
-       
+
       <!-- 显示设置区域 -->
       <div class="border-b border-gray-200">
         <h3 class="font-semibold text-gray-700 mb-4 mt-2">显示设置</h3>
@@ -255,9 +252,9 @@
               </el-col>
               <el-col :span="8">
                 <el-form-item label="排序标记" prop="sort">
-                  <el-input 
-                    v-model.number="form.sort" 
-                    autocomplete="off" 
+                  <el-input
+                    v-model.number="form.sort"
+                    autocomplete="off"
                     placeholder="请输入排序数字"
                   />
                 </el-form-item>
@@ -277,7 +274,7 @@
             </el-row>
         </el-form>
       </div>
-        
+
       <!-- 高级配置区域 -->
       <div class="border-b border-gray-200 mt-2">
         <h3 class="font-semibold text-gray-700 mb-4">高级配置</h3>
@@ -389,7 +386,7 @@
              </el-row>
         </el-form>
       </div>
-          
+
       <!-- 菜单参数配置区域 -->
       <div class="mt-2">
         <div class="flex justify-between items-center mb-4">
@@ -398,8 +395,8 @@
             新增菜单参数
           </el-button>
         </div>
-            <el-table 
-              :data="form.parameters" 
+            <el-table
+              :data="form.parameters"
               style="width: 100%"
               class="parameter-table"
             >
@@ -410,8 +407,8 @@
                 width="150"
               >
                 <template #default="scope">
-                  <el-select 
-                    v-model="scope.row.type" 
+                  <el-select
+                    v-model="scope.row.type"
                     placeholder="请选择"
                     size="small"
                   >
@@ -422,8 +419,8 @@
               </el-table-column>
               <el-table-column align="center" prop="key" label="参数key" width="150">
                 <template #default="scope">
-                  <el-input 
-                    v-model="scope.row.key" 
+                  <el-input
+                    v-model="scope.row.key"
                     size="small"
                     placeholder="请输入参数key"
                   />
@@ -431,8 +428,8 @@
               </el-table-column>
               <el-table-column align="center" prop="value" label="参数值">
                 <template #default="scope">
-                  <el-input 
-                    v-model="scope.row.value" 
+                  <el-input
+                    v-model="scope.row.value"
                     size="small"
                     placeholder="请输入参数值"
                   />
@@ -451,7 +448,7 @@
               </el-table-column>
             </el-table>
       </div>
-           
+
       <!-- 可控按钮配置区域 -->
       <div class="mb-2 mt-2">
         <div class="flex justify-between items-center mb-4">
@@ -474,8 +471,8 @@
             </el-tooltip>
           </div>
         </div>
-             <el-table 
-               :data="form.menuBtn" 
+             <el-table
+               :data="form.menuBtn"
                style="width: 100%"
                class="button-table"
              >
@@ -486,8 +483,8 @@
                  width="150"
                >
                  <template #default="scope">
-                   <el-input 
-                     v-model="scope.row.name" 
+                   <el-input
+                     v-model="scope.row.name"
                      size="small"
                      placeholder="请输入按钮名称"
                    />
@@ -495,8 +492,8 @@
                </el-table-column>
                <el-table-column align="center" prop="desc" label="备注">
                  <template #default="scope">
-                   <el-input 
-                     v-model="scope.row.desc" 
+                   <el-input
+                     v-model="scope.row.desc"
                      size="small"
                      placeholder="请输入按钮备注"
                    />
@@ -883,7 +880,7 @@
   }
 
 
-  
+
   .form-tip {
     margin-top: 8px;
     font-size: 12px;
@@ -891,36 +888,36 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    
+
     .el-icon {
       color: #409eff;
     }
   }
-  
+
   .label-with-tooltip {
     display: flex;
     align-items: center;
     gap: 6px;
-    
+
     .el-icon {
       color: #909399;
       cursor: help;
-      
+
       &:hover {
         color: #409eff;
       }
     }
   }
-  
+
   .parameter-table,
   .button-table {
     border: 1px solid #ebeef5;
     border-radius: 6px;
-    
+
     :deep(.el-table__header) {
       background-color: #fafafa;
     }
-    
+
     :deep(.el-table__body) {
       .el-table__row {
         &:hover {
