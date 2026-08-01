@@ -3,6 +3,7 @@ package system
 import (
 	"context"
 	"errors"
+	"strconv"
 
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/system"
@@ -41,22 +42,23 @@ func (baseMenuService *BaseMenuV2Service) DeleteBaseMenu(ctx context.Context, id
 			return err
 		}
 
-		err = tx.Delete(&system.SysBaseMenuV2Parameter{}, "sys_base_menu_id = ?", id).Error
+		err = tx.Delete(&system.SysBaseMenuParameter{}, "sys_base_menu_id = ? and menu_version = ?", id, system.MenuVersionV2).Error
 		if err != nil {
 			return err
 		}
 
-		err = tx.Delete(&system.SysBaseMenuBtn{}, "sys_base_menu_id = ?", id).Error
+		err = tx.Delete(&system.SysBaseMenuBtn{}, "sys_base_menu_id = ? and menu_version = ?", id, system.MenuVersionV2).Error
 		if err != nil {
 			return err
 		}
-		err = tx.Delete(&system.SysAuthorityBtn{}, "sys_menu_id = ?", id).Error
+		err = tx.Delete(&system.SysAuthorityBtn{}, "sys_menu_id = ? and menu_version = ?", id, system.MenuVersionV2).Error
 		if err != nil {
 			return err
 		}
 
 		// V2 菜单的权限关联记录在独立的 sys_authority_menus_v2 表
-		err = tx.Delete(&system.SysAuthorityMenuV2{}, "sys_base_menu_id = ?", id).Error
+		// sys_authority_menus_v2.sys_base_menu_id 为 text 列，PostgreSQL/pgx 不会自动将 int 编码为 text，需显式转字符串
+		err = tx.Delete(&system.SysAuthorityMenuV2{}, "sys_base_menu_id = ?", strconv.Itoa(id)).Error
 		if err != nil {
 			return err
 		}
@@ -83,6 +85,8 @@ func (baseMenuService *BaseMenuV2Service) UpdateBaseMenu(ctx context.Context, me
 	upDateMap["name"] = menu.Name
 	upDateMap["hidden"] = menu.Hidden
 	upDateMap["component"] = menu.Component
+	upDateMap["menu_type"] = menu.MenuType
+	upDateMap["layout"] = menu.Layout
 	upDateMap["title"] = menu.Meta.Title
 	upDateMap["active_name"] = menu.Meta.ActiveName
 	upDateMap["icon"] = menu.Meta.Icon
@@ -96,12 +100,12 @@ func (baseMenuService *BaseMenuV2Service) UpdateBaseMenu(ctx context.Context, me
 				return errors.New("存在相同name修改失败")
 			}
 		}
-		txErr := tx.Unscoped().Delete(&system.SysBaseMenuV2Parameter{}, "sys_base_menu_id = ?", menu.ID).Error
+		txErr := tx.Unscoped().Delete(&system.SysBaseMenuParameter{}, "sys_base_menu_id = ? and menu_version = ?", menu.ID, system.MenuVersionV2).Error
 		if txErr != nil {
 			logger.WithCtx(ctx).Mod("biz").Debug(txErr.Error())
 			return txErr
 		}
-		txErr = tx.Unscoped().Delete(&system.SysBaseMenuBtn{}, "sys_base_menu_id = ?", menu.ID).Error
+		txErr = tx.Unscoped().Delete(&system.SysBaseMenuBtn{}, "sys_base_menu_id = ? and menu_version = ?", menu.ID, system.MenuVersionV2).Error
 		if txErr != nil {
 			logger.WithCtx(ctx).Mod("biz").Debug(txErr.Error())
 			return txErr
@@ -109,6 +113,7 @@ func (baseMenuService *BaseMenuV2Service) UpdateBaseMenu(ctx context.Context, me
 		if len(menu.Parameters) > 0 {
 			for k := range menu.Parameters {
 				menu.Parameters[k].SysBaseMenuID = menu.ID
+				menu.Parameters[k].MenuVersion = system.MenuVersionV2
 			}
 			txErr = tx.Create(&menu.Parameters).Error
 			if txErr != nil {
@@ -120,6 +125,7 @@ func (baseMenuService *BaseMenuV2Service) UpdateBaseMenu(ctx context.Context, me
 		if len(menu.MenuBtn) > 0 {
 			for k := range menu.MenuBtn {
 				menu.MenuBtn[k].SysBaseMenuID = menu.ID
+				menu.MenuBtn[k].MenuVersion = system.MenuVersionV2
 			}
 			txErr = tx.Create(&menu.MenuBtn).Error
 			if txErr != nil {
@@ -145,6 +151,6 @@ func (baseMenuService *BaseMenuV2Service) UpdateBaseMenu(ctx context.Context, me
 //@return: menu system.SysBaseMenuV2, err error
 
 func (baseMenuService *BaseMenuV2Service) GetBaseMenuById(ctx context.Context, id int) (menu system.SysBaseMenuV2, err error) {
-	err = global.GVA_DB.WithContext(ctx).Preload("MenuBtn").Preload("Parameters").Where("id = ?", id).First(&menu).Error
+	err = global.GVA_DB.WithContext(ctx).Preload("MenuBtn", "menu_version = ?", system.MenuVersionV2).Preload("Parameters", "menu_version = ?", system.MenuVersionV2).Where("id = ?", id).First(&menu).Error
 	return
 }

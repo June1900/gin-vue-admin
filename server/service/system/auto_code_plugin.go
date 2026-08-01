@@ -307,7 +307,7 @@ func (s *autoCodePlugin) InitMenu(ctx context.Context, menuInfo request.InitMenu
 	}
 
 	// 查询菜单及其关联的参数和按钮
-	err = global.GVA_DB.WithContext(ctx).Preload("Parameters").Preload("MenuBtn").Find(&menus, "id in (?)", menuInfo.Menus).Error
+	err = global.GVA_DB.WithContext(ctx).Preload("Parameters", "menu_version = ?", system.MenuVersionV1).Preload("MenuBtn", "menu_version = ?", system.MenuVersionV1).Find(&menus, "id in (?)", menuInfo.Menus).Error
 	if err != nil {
 		return err
 	}

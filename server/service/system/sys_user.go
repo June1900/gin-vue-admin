@@ -174,7 +174,7 @@ func (userService *UserService) SetUserAuthority(ctx context.Context, id uint, a
 	}
 
 	var authorityMenus []system.SysBaseMenu
-	err = global.GVA_DB.WithContext(ctx).Preload("Parameters").Where("id in (?)", authorityMenuIDs).Find(&authorityMenus).Error
+	err = global.GVA_DB.WithContext(ctx).Preload("Parameters", "menu_version = ?", system.MenuVersionV1).Where("id in (?)", authorityMenuIDs).Find(&authorityMenus).Error
 	if err != nil {
 		return err
 	}

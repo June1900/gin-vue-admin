@@ -15,8 +15,12 @@ type AuthorityBtnService struct{}
 var AuthorityBtnServiceApp = new(AuthorityBtnService)
 
 func (a *AuthorityBtnService) GetAuthorityBtn(ctx context.Context, req request.SysAuthorityBtnReq) (res response.SysAuthorityBtnRes, err error) {
+	version := req.MenuVersion
+	if version == "" {
+		version = system.MenuVersionV1
+	}
 	var authorityBtn []system.SysAuthorityBtn
-	err = global.GVA_DB.WithContext(ctx).Find(&authorityBtn, "authority_id = ? and sys_menu_id = ?", req.AuthorityId, req.MenuID).Error
+	err = global.GVA_DB.WithContext(ctx).Find(&authorityBtn, "authority_id = ? and sys_menu_id = ? and menu_version = ?", req.AuthorityId, req.MenuID, version).Error
 	if err != nil {
 		return
 	}
@@ -29,9 +33,13 @@ func (a *AuthorityBtnService) GetAuthorityBtn(ctx context.Context, req request.S
 }
 
 func (a *AuthorityBtnService) SetAuthorityBtn(ctx context.Context, req request.SysAuthorityBtnReq) (err error) {
+	version := req.MenuVersion
+	if version == "" {
+		version = system.MenuVersionV1
+	}
 	return global.GVA_DB.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		var authorityBtn []system.SysAuthorityBtn
-		err = tx.Delete(&[]system.SysAuthorityBtn{}, "authority_id = ? and sys_menu_id = ?", req.AuthorityId, req.MenuID).Error
+		err = tx.Delete(&[]system.SysAuthorityBtn{}, "authority_id = ? and sys_menu_id = ? and menu_version = ?", req.AuthorityId, req.MenuID, version).Error
 		if err != nil {
 			return err
 		}
@@ -40,6 +48,7 @@ func (a *AuthorityBtnService) SetAuthorityBtn(ctx context.Context, req request.S
 				AuthorityId:      req.AuthorityId,
 				SysMenuID:        req.MenuID,
 				SysBaseMenuBtnID: v,
+				MenuVersion:      version,
 			})
 		}
 		if len(authorityBtn) > 0 {

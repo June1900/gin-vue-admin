@@ -12,13 +12,16 @@ type SysBaseMenuV2 struct {
 	Name          string          `json:"name" gorm:"comment:路由name"`        // 路由name
 	Hidden        bool            `json:"hidden" gorm:"comment:是否在列表隐藏"`     // 是否在列表隐藏
 	Component     string          `json:"component" gorm:"comment:对应前端文件路径"` // 对应前端文件路径
+	MenuType      string          `json:"menuType" gorm:"comment:菜单类型"`      // 菜单类型
+	Layout        string          `json:"layout" gorm:"comment:布局方式"`        // 布局方式
 	Sort          int             `json:"sort" gorm:"comment:排序标记"`          // 排序标记
 	Meta          MetaV2          `json:"meta" gorm:"embedded"`              // 附加属性
 	SysAuthoritys []SysAuthority  `json:"authoritys" gorm:"many2many:sys_authority_menus_v2;"`
 	Children      []SysBaseMenuV2 `json:"children" gorm:"-"`
-	// 显式声明外键为 SysBaseMenuID（V2Parameter/SysBaseMenuBtn 中均沿用该字段名），避免 GORM 默认按 SysBaseMenuV2ID 推断导致 schema 解析失败
-	Parameters []SysBaseMenuV2Parameter `json:"parameters" gorm:"foreignKey:SysBaseMenuID"`
-	MenuBtn    []SysBaseMenuBtn         `json:"menuBtn" gorm:"foreignKey:SysBaseMenuID"`
+	// 显式声明外键为 SysBaseMenuID（SysBaseMenuBtn 中沿用该字段名），避免 GORM 默认按 SysBaseMenuV2ID 推断导致 schema 解析失败
+	// Parameters 复用 V1 的 SysBaseMenuParameter，共享 sys_base_menu_parameters 表，通过 MenuVersion 列区分 V1/V2
+	Parameters []SysBaseMenuParameter `json:"parameters" gorm:"foreignKey:SysBaseMenuID"`
+	MenuBtn    []SysBaseMenuBtn       `json:"menuBtn" gorm:"foreignKey:SysBaseMenuID"`
 }
 
 type MetaV2 struct {
@@ -29,14 +32,6 @@ type MetaV2 struct {
 	Icon           string `json:"icon" gorm:"comment:菜单图标"`                // 菜单图标
 	CloseTab       bool   `json:"closeTab" gorm:"comment:自动关闭tab"`         // 自动关闭tab
 	TransitionType string `json:"transitionType" gorm:"comment:路由切换动画"`    // 路由切换动画
-}
-
-type SysBaseMenuV2Parameter struct {
-	global.GVA_MODEL
-	SysBaseMenuID uint
-	Type          string `json:"type" gorm:"comment:地址栏携带参数为params还是query"` // 地址栏携带参数为params还是query
-	Key           string `json:"key" gorm:"comment:地址栏携带参数的key"`            // 地址栏携带参数的key
-	Value         string `json:"value" gorm:"comment:地址栏携带参数的值"`            // 地址栏携带参数的值
 }
 
 func (SysBaseMenuV2) TableName() string {
@@ -50,7 +45,7 @@ type SysMenuV2 struct {
 	MenuId      uint                     `json:"menuId" gorm:"comment:菜单ID"`
 	AuthorityId uint                     `json:"-" gorm:"comment:角色ID"`
 	Children    []SysMenuV2              `json:"children" gorm:"-"`
-	Parameters  []SysBaseMenuV2Parameter `json:"parameters" gorm:"foreignKey:SysBaseMenuID;references:MenuId"`
+	Parameters  []SysBaseMenuParameter `json:"parameters" gorm:"foreignKey:SysBaseMenuID;references:MenuId"`
 	Btns        map[string]uint          `json:"btns" gorm:"-"`
 }
 

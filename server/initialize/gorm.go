@@ -75,7 +75,6 @@ func RegisterTables() {
 		system.SysTimedTask{},
 		system.SysTimedTaskLog{},
 		system.SysBaseMenuV2{},
-		system.SysBaseMenuV2Parameter{},
 		system.SysAuthorityMenuV2{},
 
 		example.ExaCustomer{},

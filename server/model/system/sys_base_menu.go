@@ -36,6 +36,7 @@ type SysBaseMenuParameter struct {
 	Type          string `json:"type" gorm:"comment:地址栏携带参数为params还是query"` // 地址栏携带参数为params还是query
 	Key           string `json:"key" gorm:"comment:地址栏携带参数的key"`              // 地址栏携带参数的key
 	Value         string `json:"value" gorm:"comment:地址栏携带参数的值"`             // 地址栏携带参数的值
+	MenuVersion   string `json:"menuVersion" gorm:"type:varchar(8);default:v1;comment:菜单版本 v1/v2"`
 }
 
 func (SysBaseMenu) TableName() string {

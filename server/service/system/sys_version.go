@@ -75,7 +75,7 @@ func (sysVersionService *SysVersionService) GetSysVersionPublic(ctx context.Cont
 
 // GetMenusByIds 根据ID列表获取菜单数据
 func (sysVersionService *SysVersionService) GetMenusByIds(ctx context.Context, ids []uint) (menus []system.SysBaseMenu, err error) {
-	err = global.GVA_DB.WithContext(ctx).Where("id in ?", ids).Preload("Parameters").Preload("MenuBtn").Find(&menus).Error
+	err = global.GVA_DB.WithContext(ctx).Where("id in ?", ids).Preload("Parameters", "menu_version = ?", system.MenuVersionV1).Preload("MenuBtn", "menu_version = ?", system.MenuVersionV1).Find(&menus).Error
 	return
 }
 

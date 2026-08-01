@@ -27,7 +27,7 @@ func (menuService *MenuV2Service) getMenuTreeMap(ctx context.Context, authorityI
 	treeMap = make(map[uint][]system.SysMenuV2)
 
 	var SysAuthorityMenus []system.SysAuthorityMenuV2
-	err = global.GVA_DB.WithContext(ctx).Where("sys_authority_authority_id = ?", authorityId).Find(&SysAuthorityMenus).Error
+	err = global.GVA_DB.WithContext(ctx).Where("sys_authority_authority_id = ?", strconv.Itoa(int(authorityId))).Find(&SysAuthorityMenus).Error
 	if err != nil {
 		return
 	}
@@ -38,7 +38,7 @@ func (menuService *MenuV2Service) getMenuTreeMap(ctx context.Context, authorityI
 		MenuIds = append(MenuIds, SysAuthorityMenus[i].MenuId)
 	}
 
-	err = global.GVA_DB.WithContext(ctx).Where("id in (?)", MenuIds).Order("sort").Preload("Parameters").Find(&baseMenu).Error
+	err = global.GVA_DB.WithContext(ctx).Where("id in (?)", MenuIds).Order("sort").Preload("Parameters", "menu_version = ?", system.MenuVersionV2).Find(&baseMenu).Error
 	if err != nil {
 		return
 	}
@@ -52,7 +52,7 @@ func (menuService *MenuV2Service) getMenuTreeMap(ctx context.Context, authorityI
 		})
 	}
 
-	err = global.GVA_DB.WithContext(ctx).Where("authority_id = ?", authorityId).Preload("SysBaseMenuBtn").Find(&btns).Error
+	err = global.GVA_DB.WithContext(ctx).Where("authority_id = ? and menu_version = ?", authorityId, system.MenuVersionV2).Preload("SysBaseMenuBtn").Find(&btns).Error
 	if err != nil {
 		return
 	}
@@ -166,13 +166,21 @@ func (menuService *MenuV2Service) AddBaseMenu(ctx context.Context, menu system.S
 				}
 
 				// 清空父菜单的所有权限分配
-				err = tx.Where("sys_base_menu_id = ?", menu.ParentId).Delete(&system.SysAuthorityMenuV2{}).Error
+				// sys_authority_menus_v2.sys_base_menu_id 为 text 列，PostgreSQL/pgx 不会自动将 uint 编码为 text，需显式转字符串
+				err = tx.Where("sys_base_menu_id = ?", strconv.Itoa(int(menu.ParentId))).Delete(&system.SysAuthorityMenuV2{}).Error
 				if err != nil {
 					return err
 				}
 			}
 		}
 
+		// V2 菜单的按钮和参数需显式盖 v2 戳（默认值为 v1），否则会被 V1 读取或被 V2 过滤漏掉
+		for k := range menu.MenuBtn {
+			menu.MenuBtn[k].MenuVersion = system.MenuVersionV2
+		}
+		for k := range menu.Parameters {
+			menu.Parameters[k].MenuVersion = system.MenuVersionV2
+		}
 		// 创建菜单
 		return tx.Create(&menu).Error
 	})
@@ -190,12 +198,12 @@ func (menuService *MenuV2Service) getBaseMenuTreeMap(ctx context.Context, author
 
 	var allMenus []system.SysBaseMenuV2
 	treeMap = make(map[uint][]system.SysBaseMenuV2)
-	db := global.GVA_DB.WithContext(ctx).Order("sort").Preload("MenuBtn").Preload("Parameters")
+	db := global.GVA_DB.WithContext(ctx).Order("sort").Preload("MenuBtn", "menu_version = ?", system.MenuVersionV2).Preload("Parameters", "menu_version = ?", system.MenuVersionV2)
 
 	// 当开启了严格的树角色并且父角色不为0时需要进行菜单筛选
 	if global.GVA_CONFIG.System.UseStrictAuth && parentAuthorityID != 0 {
 		var authorityMenus []system.SysAuthorityMenuV2
-		err = global.GVA_DB.WithContext(ctx).Where("sys_authority_authority_id = ?", authorityID).Find(&authorityMenus).Error
+		err = global.GVA_DB.WithContext(ctx).Where("sys_authority_authority_id = ?", strconv.Itoa(int(authorityID))).Find(&authorityMenus).Error
 		if err != nil {
 			return nil, err
 		}
@@ -244,7 +252,7 @@ func (menuService *MenuV2Service) AddMenuAuthority(ctx context.Context, menus []
 	// 当开启了严格的树角色并且父角色不为0时需要进行菜单筛选
 	if global.GVA_CONFIG.System.UseStrictAuth && *authority.ParentId != 0 {
 		var authorityMenus []system.SysAuthorityMenuV2
-		err = global.GVA_DB.WithContext(ctx).Where("sys_authority_authority_id = ?", adminAuthorityID).Find(&authorityMenus).Error
+		err = global.GVA_DB.WithContext(ctx).Where("sys_authority_authority_id = ?", strconv.Itoa(int(adminAuthorityID))).Find(&authorityMenus).Error
 		if err != nil {
 			return err
 		}
@@ -270,7 +278,8 @@ func (menuService *MenuV2Service) AddMenuAuthority(ctx context.Context, menus []
 	// （SysAuthority.SysBaseMenus 为 V1 类型，无法直接通过 Association 写入 V2 菜单）
 	return global.GVA_DB.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		// 1. 删除该角色所有已有的菜单关联
-		if err := tx.Where("sys_authority_authority_id = ?", authorityId).Delete(&system.SysAuthorityMenuV2{}).Error; err != nil {
+		// sys_authority_menus_v2.sys_authority_authority_id 为 text 列，PostgreSQL/pgx 不会自动将 uint 编码为 text，需显式转字符串
+		if err := tx.Where("sys_authority_authority_id = ?", strconv.Itoa(int(authorityId))).Delete(&system.SysAuthorityMenuV2{}).Error; err != nil {
 			return err
 		}
 		// 2. 批量插入新的关联记录
@@ -299,7 +308,8 @@ func (menuService *MenuV2Service) AddMenuAuthority(ctx context.Context, menus []
 func (menuService *MenuV2Service) GetMenuAuthority(ctx context.Context, info *request.GetAuthorityId) (menus []system.SysMenuV2, err error) {
 	var baseMenu []system.SysBaseMenuV2
 	var SysAuthorityMenus []system.SysAuthorityMenuV2
-	err = global.GVA_DB.WithContext(ctx).Where("sys_authority_authority_id = ?", info.AuthorityId).Find(&SysAuthorityMenus).Error
+	// sys_authority_menus_v2.sys_authority_authority_id 为 text 列，PostgreSQL/pgx 不会自动将 uint 编码为 text，需显式转字符串
+	err = global.GVA_DB.WithContext(ctx).Where("sys_authority_authority_id = ?", strconv.Itoa(int(info.AuthorityId))).Find(&SysAuthorityMenus).Error
 	if err != nil {
 		return
 	}
@@ -326,7 +336,8 @@ func (menuService *MenuV2Service) GetMenuAuthority(ctx context.Context, info *re
 // GetAuthoritiesByMenuId 获取拥有指定菜单的所有角色ID
 func (menuService *MenuV2Service) GetAuthoritiesByMenuId(ctx context.Context, menuId uint) (authorityIds []uint, err error) {
 	var records []system.SysAuthorityMenuV2
-	err = global.GVA_DB.WithContext(ctx).Where("sys_base_menu_id = ?", menuId).Find(&records).Error
+	// sys_authority_menus_v2.sys_base_menu_id 为 text 列，PostgreSQL/pgx 不会自动将 uint 编码为 text，需显式转字符串
+	err = global.GVA_DB.WithContext(ctx).Where("sys_base_menu_id = ?", strconv.Itoa(int(menuId))).Find(&records).Error
 	if err != nil {
 		return nil, err
 	}
@@ -361,7 +372,8 @@ func (menuService *MenuV2Service) GetDefaultRouterAuthorityIds(ctx context.Conte
 func (menuService *MenuV2Service) SetMenuAuthorities(ctx context.Context, menuId uint, authorityIds []uint) error {
 	return global.GVA_DB.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		// 1. 删除该菜单所有已有的角色关联
-		if err := tx.Where("sys_base_menu_id = ?", menuId).Delete(&system.SysAuthorityMenuV2{}).Error; err != nil {
+		// sys_authority_menus_v2.sys_base_menu_id 为 text 列，PostgreSQL/pgx 不会自动将 uint 编码为 text，需显式转字符串
+		if err := tx.Where("sys_base_menu_id = ?", strconv.Itoa(int(menuId))).Delete(&system.SysAuthorityMenuV2{}).Error; err != nil {
 			return err
 		}
 		// 2. 批量插入新的关联记录
@@ -385,7 +397,8 @@ func (menuService *MenuV2Service) SetMenuAuthorities(ctx context.Context, menuId
 // UserAuthorityDefaultRouter 用户角色默认路由检查
 func (menuService *MenuV2Service) UserAuthorityDefaultRouter(ctx context.Context, user *system.SysUser) {
 	var menuIds []string
-	err := global.GVA_DB.WithContext(ctx).Model(&system.SysAuthorityMenuV2{}).Where("sys_authority_authority_id = ?", user.AuthorityId).Pluck("sys_base_menu_id", &menuIds).Error
+	// sys_authority_menus_v2.sys_authority_authority_id 为 text 列，PostgreSQL/pgx 不会自动将 uint 编码为 text，需显式转字符串
+	err := global.GVA_DB.WithContext(ctx).Model(&system.SysAuthorityMenuV2{}).Where("sys_authority_authority_id = ?", strconv.Itoa(int(user.AuthorityId))).Pluck("sys_base_menu_id", &menuIds).Error
 	if err != nil {
 		return
 	}

@@ -3,6 +3,7 @@ package system
 import (
 	"context"
 	"errors"
+	"strconv"
 
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/system"
@@ -41,21 +42,22 @@ func (baseMenuService *BaseMenuService) DeleteBaseMenu(ctx context.Context, id i
 			return err
 		}
 
-		err = tx.Delete(&system.SysBaseMenuParameter{}, "sys_base_menu_id = ?", id).Error
+		err = tx.Delete(&system.SysBaseMenuParameter{}, "sys_base_menu_id = ? and menu_version = ?", id, system.MenuVersionV1).Error
 		if err != nil {
 			return err
 		}
 
-		err = tx.Delete(&system.SysBaseMenuBtn{}, "sys_base_menu_id = ?", id).Error
+		err = tx.Delete(&system.SysBaseMenuBtn{}, "sys_base_menu_id = ? and menu_version = ?", id, system.MenuVersionV1).Error
 		if err != nil {
 			return err
 		}
-		err = tx.Delete(&system.SysAuthorityBtn{}, "sys_menu_id = ?", id).Error
+		err = tx.Delete(&system.SysAuthorityBtn{}, "sys_menu_id = ? and menu_version = ?", id, system.MenuVersionV1).Error
 		if err != nil {
 			return err
 		}
 
-		err = tx.Delete(&system.SysAuthorityMenu{}, "sys_base_menu_id = ?", id).Error
+		// sys_authority_menus.sys_base_menu_id 为 text 列，PostgreSQL/pgx 不会自动将 int 编码为 text，需显式转字符串
+		err = tx.Delete(&system.SysAuthorityMenu{}, "sys_base_menu_id = ?", strconv.Itoa(id)).Error
 		if err != nil {
 			return err
 		}
@@ -95,12 +97,12 @@ func (baseMenuService *BaseMenuService) UpdateBaseMenu(ctx context.Context, menu
 				return errors.New("存在相同name修改失败")
 			}
 		}
-		txErr := tx.Unscoped().Delete(&system.SysBaseMenuParameter{}, "sys_base_menu_id = ?", menu.ID).Error
+		txErr := tx.Unscoped().Delete(&system.SysBaseMenuParameter{}, "sys_base_menu_id = ? and menu_version = ?", menu.ID, system.MenuVersionV1).Error
 		if txErr != nil {
 			logger.WithCtx(ctx).Mod("biz").Debug(txErr.Error())
 			return txErr
 		}
-		txErr = tx.Unscoped().Delete(&system.SysBaseMenuBtn{}, "sys_base_menu_id = ?", menu.ID).Error
+		txErr = tx.Unscoped().Delete(&system.SysBaseMenuBtn{}, "sys_base_menu_id = ? and menu_version = ?", menu.ID, system.MenuVersionV1).Error
 		if txErr != nil {
 			logger.WithCtx(ctx).Mod("biz").Debug(txErr.Error())
 			return txErr
@@ -144,6 +146,6 @@ func (baseMenuService *BaseMenuService) UpdateBaseMenu(ctx context.Context, menu
 //@return: menu system.SysBaseMenu, err error
 
 func (baseMenuService *BaseMenuService) GetBaseMenuById(ctx context.Context, id int) (menu system.SysBaseMenu, err error) {
-	err = global.GVA_DB.WithContext(ctx).Preload("MenuBtn").Preload("Parameters").Where("id = ?", id).First(&menu).Error
+	err = global.GVA_DB.WithContext(ctx).Preload("MenuBtn", "menu_version = ?", system.MenuVersionV1).Preload("Parameters", "menu_version = ?", system.MenuVersionV1).Where("id = ?", id).First(&menu).Error
 	return
 }

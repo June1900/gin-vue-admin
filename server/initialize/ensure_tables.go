@@ -59,7 +59,6 @@ func (e *ensureTables) MigrateTable(ctx context.Context) (context.Context, error
 		sysModel.SysLoginLog{},
 		sysModel.SysApiToken{},
 		sysModel.SysBaseMenuV2{},
-		sysModel.SysBaseMenuV2Parameter{},
 		sysModel.SysAuthorityMenuV2{},
 		adapter.CasbinRule{},
 
@@ -102,7 +101,6 @@ func (e *ensureTables) TableCreated(ctx context.Context) bool {
 		sysModel.Condition{},
 		sysModel.JoinTemplate{},
 		sysModel.SysBaseMenuV2{},
-		sysModel.SysBaseMenuV2Parameter{},
 		sysModel.SysAuthorityMenuV2{},
 
 		adapter.CasbinRule{},

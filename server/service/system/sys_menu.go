@@ -28,7 +28,8 @@ func (menuService *MenuService) getMenuTreeMap(ctx context.Context, authorityId 
 	treeMap = make(map[uint][]system.SysMenu)
 
 	var SysAuthorityMenus []system.SysAuthorityMenu
-	err = global.GVA_DB.WithContext(ctx).Where("sys_authority_authority_id = ?", authorityId).Find(&SysAuthorityMenus).Error
+	// sys_authority_menus.sys_authority_authority_id 为 text 列，PostgreSQL/pgx 不会自动将 uint 编码为 text，需显式转字符串
+	err = global.GVA_DB.WithContext(ctx).Where("sys_authority_authority_id = ?", strconv.Itoa(int(authorityId))).Find(&SysAuthorityMenus).Error
 	if err != nil {
 		return
 	}
@@ -39,7 +40,7 @@ func (menuService *MenuService) getMenuTreeMap(ctx context.Context, authorityId 
 		MenuIds = append(MenuIds, SysAuthorityMenus[i].MenuId)
 	}
 
-	err = global.GVA_DB.WithContext(ctx).Where("id in (?)", MenuIds).Order("sort").Preload("Parameters").Find(&baseMenu).Error
+	err = global.GVA_DB.WithContext(ctx).Where("id in (?)", MenuIds).Order("sort").Preload("Parameters", "menu_version = ?", system.MenuVersionV1).Find(&baseMenu).Error
 	if err != nil {
 		return
 	}
@@ -53,7 +54,7 @@ func (menuService *MenuService) getMenuTreeMap(ctx context.Context, authorityId 
 		})
 	}
 
-	err = global.GVA_DB.WithContext(ctx).Where("authority_id = ?", authorityId).Preload("SysBaseMenuBtn").Find(&btns).Error
+	err = global.GVA_DB.WithContext(ctx).Where("authority_id = ? and menu_version = ?", authorityId, system.MenuVersionV1).Preload("SysBaseMenuBtn").Find(&btns).Error
 	if err != nil {
 		return
 	}
@@ -172,7 +173,8 @@ func (menuService *MenuService) AddBaseMenu(ctx context.Context, menu system.Sys
 				}
 
 				// 清空父菜单的所有权限分配
-				err = tx.Where("sys_base_menu_id = ?", menu.ParentId).Delete(&system.SysAuthorityMenu{}).Error
+				// sys_authority_menus.sys_base_menu_id 为 text 列，PostgreSQL/pgx 不会自动将 uint 编码为 text，需显式转字符串
+				err = tx.Where("sys_base_menu_id = ?", strconv.Itoa(int(menu.ParentId))).Delete(&system.SysAuthorityMenu{}).Error
 				if err != nil {
 					return err
 				}
@@ -197,12 +199,12 @@ func (menuService *MenuService) getBaseMenuTreeMap(ctx context.Context, authorit
 
 	var allMenus []system.SysBaseMenu
 	treeMap = make(map[uint][]system.SysBaseMenu)
-	db := global.GVA_DB.WithContext(ctx).Order("sort").Preload("MenuBtn").Preload("Parameters")
+	db := global.GVA_DB.WithContext(ctx).Order("sort").Preload("MenuBtn", "menu_version = ?", system.MenuVersionV1).Preload("Parameters", "menu_version = ?", system.MenuVersionV1)
 
 	// 当开启了严格的树角色并且父角色不为0时需要进行菜单筛选
 	if global.GVA_CONFIG.System.UseStrictAuth && parentAuthorityID != 0 {
 		var authorityMenus []system.SysAuthorityMenu
-		err = global.GVA_DB.WithContext(ctx).Where("sys_authority_authority_id = ?", authorityID).Find(&authorityMenus).Error
+		err = global.GVA_DB.WithContext(ctx).Where("sys_authority_authority_id = ?", strconv.Itoa(int(authorityID))).Find(&authorityMenus).Error
 		if err != nil {
 			return nil, err
 		}
@@ -257,7 +259,7 @@ func (menuService *MenuService) AddMenuAuthority(ctx context.Context, menus []sy
 	// 当开启了严格的树角色并且父角色不为0时需要进行菜单筛选
 	if global.GVA_CONFIG.System.UseStrictAuth && *authority.ParentId != 0 {
 		var authorityMenus []system.SysAuthorityMenu
-		err = global.GVA_DB.WithContext(ctx).Where("sys_authority_authority_id = ?", adminAuthorityID).Find(&authorityMenus).Error
+		err = global.GVA_DB.WithContext(ctx).Where("sys_authority_authority_id = ?", strconv.Itoa(int(adminAuthorityID))).Find(&authorityMenus).Error
 		if err != nil {
 			return err
 		}
@@ -292,7 +294,8 @@ func (menuService *MenuService) AddMenuAuthority(ctx context.Context, menus []sy
 func (menuService *MenuService) GetMenuAuthority(ctx context.Context, info *request.GetAuthorityId) (menus []system.SysMenu, err error) {
 	var baseMenu []system.SysBaseMenu
 	var SysAuthorityMenus []system.SysAuthorityMenu
-	err = global.GVA_DB.WithContext(ctx).Where("sys_authority_authority_id = ?", info.AuthorityId).Find(&SysAuthorityMenus).Error
+	// sys_authority_menus.sys_authority_authority_id 为 text 列，PostgreSQL/pgx 不会自动将 uint 编码为 text，需显式转字符串
+	err = global.GVA_DB.WithContext(ctx).Where("sys_authority_authority_id = ?", strconv.Itoa(int(info.AuthorityId))).Find(&SysAuthorityMenus).Error
 	if err != nil {
 		return
 	}
@@ -319,7 +322,8 @@ func (menuService *MenuService) GetMenuAuthority(ctx context.Context, info *requ
 // GetAuthoritiesByMenuId 获取拥有指定菜单的所有角色ID
 func (menuService *MenuService) GetAuthoritiesByMenuId(ctx context.Context, menuId uint) (authorityIds []uint, err error) {
 	var records []system.SysAuthorityMenu
-	err = global.GVA_DB.WithContext(ctx).Where("sys_base_menu_id = ?", menuId).Find(&records).Error
+	// sys_authority_menus.sys_base_menu_id 为 text 列，PostgreSQL/pgx 不会自动将 uint 编码为 text，需显式转字符串
+	err = global.GVA_DB.WithContext(ctx).Where("sys_base_menu_id = ?", strconv.Itoa(int(menuId))).Find(&records).Error
 	if err != nil {
 		return nil, err
 	}
@@ -354,7 +358,8 @@ func (menuService *MenuService) GetDefaultRouterAuthorityIds(ctx context.Context
 func (menuService *MenuService) SetMenuAuthorities(ctx context.Context, menuId uint, authorityIds []uint) error {
 	return global.GVA_DB.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		// 1. 删除该菜单所有已有的角色关联
-		if err := tx.Where("sys_base_menu_id = ?", menuId).Delete(&system.SysAuthorityMenu{}).Error; err != nil {
+		// sys_authority_menus.sys_base_menu_id 为 text 列，PostgreSQL/pgx 不会自动将 uint 编码为 text，需显式转字符串
+		if err := tx.Where("sys_base_menu_id = ?", strconv.Itoa(int(menuId))).Delete(&system.SysAuthorityMenu{}).Error; err != nil {
 			return err
 		}
 		// 2. 批量插入新的关联记录
@@ -380,7 +385,8 @@ func (menuService *MenuService) SetMenuAuthorities(ctx context.Context, menuId u
 //	Author [SliverHorn](https://github.com/SliverHorn)
 func (menuService *MenuService) UserAuthorityDefaultRouter(ctx context.Context, user *system.SysUser) {
 	var menuIds []string
-	err := global.GVA_DB.WithContext(ctx).Model(&system.SysAuthorityMenu{}).Where("sys_authority_authority_id = ?", user.AuthorityId).Pluck("sys_base_menu_id", &menuIds).Error
+	// sys_authority_menus.sys_authority_authority_id 为 text 列，PostgreSQL/pgx 不会自动将 uint 编码为 text，需显式转字符串
+	err := global.GVA_DB.WithContext(ctx).Model(&system.SysAuthorityMenu{}).Where("sys_authority_authority_id = ?", strconv.Itoa(int(user.AuthorityId))).Pluck("sys_base_menu_id", &menuIds).Error
 	if err != nil {
 		return
 	}
