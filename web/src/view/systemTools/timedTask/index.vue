@@ -181,6 +181,23 @@
           </div>
         </div>
       </template>
+      <div class="flex items-center gap-2 mb-3 flex-wrap">
+        <el-date-picker
+          v-model="logStartAt"
+          type="datetime"
+          placeholder="开始时间"
+          :disabled-date="logDisabledDateStart"
+        />
+        <span class="text-gray-400">至</span>
+        <el-date-picker
+          v-model="logEndAt"
+          type="datetime"
+          placeholder="结束时间"
+          :disabled-date="logDisabledDateEnd"
+        />
+        <el-button type="primary" icon="search" @click="onLogSearch">查询</el-button>
+        <el-button icon="refresh" @click="onLogReset">重置</el-button>
+      </div>
       <el-table :data="logData" style="width: 100%">
         <el-table-column type="expand">
           <template #default="scope">
@@ -401,19 +418,65 @@ const logPage = ref(1)
 const logPageSize = ref(10)
 const logTaskId = ref(0)
 const logTaskName = ref('')
+const logStartAt = ref(null)
+const logEndAt = ref(null)
+
+// 开始时间选择器: 结束时间已选时, 禁止选更晚的日期
+const logDisabledDateStart = (time) => {
+  return logEndAt.value ? time.getTime() > logEndAt.value.getTime() : false
+}
+// 结束时间选择器: 开始时间已选时, 禁止选更早的日期
+const logDisabledDateEnd = (time) => {
+  return logStartAt.value ? time.getTime() < logStartAt.value.getTime() : false
+}
+
+// 格式化为后端 time_format 期望的字符串(2006-01-02 15:04:05)
+const formatLogTime = (date) => {
+  if (!date) return undefined
+  const d = new Date(date)
+  const pad = (n) => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
+}
+
+const buildLogParams = () => {
+  const params = {
+    page: logPage.value,
+    pageSize: logPageSize.value,
+    taskId: logTaskId.value
+  }
+  const start = formatLogTime(logStartAt.value)
+  const end = formatLogTime(logEndAt.value)
+  if (start) params.startCreatedAt = start
+  if (end) params.endCreatedAt = end
+  return params
+}
 
 const loadLogs = async () => {
-  const res = await getTimedTaskLogList({ page: logPage.value, pageSize: logPageSize.value, taskId: logTaskId.value })
+  const res = await getTimedTaskLogList(buildLogParams())
   if (res.code === 0) {
     logData.value = res.data.list
     logTotal.value = res.data.total
   }
 }
 
+const onLogSearch = () => {
+  logPage.value = 1
+  loadLogs()
+}
+
+const onLogReset = () => {
+  logStartAt.value = null
+  logEndAt.value = null
+  logPage.value = 1
+  loadLogs()
+}
+
 const openLogs = (row) => {
   logTaskId.value = row.ID
   logTaskName.value = row.name
   logPage.value = 1
+  logStartAt.value = null
+  logEndAt.value = null
   logVisible.value = true
   loadLogs()
 }

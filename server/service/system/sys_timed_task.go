@@ -150,8 +150,10 @@ func (s *TimedTaskService) UpdateTimedTask(ctx context.Context, t *system.SysTim
 		return err
 	}
 	err := global.GVA_DB.WithContext(ctx).Model(&system.SysTimedTask{}).Where("id = ?", t.ID).
-		Select("name", "description", "spec", "with_seconds", "executor_type", "method_name",
-			"params", "http_url", "http_method", "http_header", "http_body", "http_allow_private", "enabled").
+		Select(
+			"name", "description", "spec", "with_seconds", "executor_type", "method_name", "params", "http_url",
+			"http_method", "http_header", "http_body", "http_allow_private", "enabled",
+		).
 		Updates(t).Error
 	if err != nil {
 		return err
@@ -190,7 +192,9 @@ func (s *TimedTaskService) TriggerTimedTask(ctx context.Context, id uint) error 
 }
 
 // GetTimedTaskList 分页列表 + 从调度器快照实时补 nextRunAt
-func (s *TimedTaskService) GetTimedTaskList(ctx context.Context, info systemReq.SysTimedTaskSearch) (list []systemRes.SysTimedTaskRow, total int64, err error) {
+func (s *TimedTaskService) GetTimedTaskList(
+	ctx context.Context, info systemReq.SysTimedTaskSearch,
+) (list []systemRes.SysTimedTaskRow, total int64, err error) {
 	limit, offset := info.LimitOffset()
 	db := global.GVA_DB.WithContext(ctx).Model(&system.SysTimedTask{})
 	if info.Name != "" {
@@ -230,7 +234,9 @@ func (s *TimedTaskService) GetTimedTaskList(ctx context.Context, info systemReq.
 }
 
 // GetTimedTaskLogList 执行日志分页(按任务/状态过滤)
-func (s *TimedTaskService) GetTimedTaskLogList(ctx context.Context, info systemReq.SysTimedTaskLogSearch) (list []system.SysTimedTaskLog, total int64, err error) {
+func (s *TimedTaskService) GetTimedTaskLogList(
+	ctx context.Context, info systemReq.SysTimedTaskLogSearch,
+) (list []system.SysTimedTaskLog, total int64, err error) {
 	limit, offset := info.LimitOffset()
 	db := global.GVA_DB.WithContext(ctx).Model(&system.SysTimedTaskLog{})
 	if info.TaskId > 0 {
@@ -238,6 +244,12 @@ func (s *TimedTaskService) GetTimedTaskLogList(ctx context.Context, info systemR
 	}
 	if info.Status != "" {
 		db = db.Where("status = ?", info.Status)
+	}
+	if info.TriggerType != "" {
+		db = db.Where("trigger_type = ?", info.TriggerType)
+	}
+	if info.StartCreatedAt != nil && info.EndCreatedAt != nil {
+		db = db.Where("started_at BETWEEN ? AND ?", info.StartCreatedAt, info.EndCreatedAt)
 	}
 	if err = db.Count(&total).Error; err != nil {
 		return
