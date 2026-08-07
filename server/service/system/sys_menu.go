@@ -381,8 +381,6 @@ func (menuService *MenuService) SetMenuAuthorities(ctx context.Context, menuId u
 }
 
 // UserAuthorityDefaultRouter 用户角色默认路由检查
-//
-//	Author [SliverHorn](https://github.com/SliverHorn)
 func (menuService *MenuService) UserAuthorityDefaultRouter(ctx context.Context, user *system.SysUser) {
 	var menuIds []string
 	// sys_authority_menus.sys_authority_authority_id 为 text 列，PostgreSQL/pgx 不会自动将 uint 编码为 text，需显式转字符串
