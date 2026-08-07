@@ -10,6 +10,7 @@
         <el-select
           :model-value="row.defaultRouter"
           filterable
+          clearable
           placeholder="请选择默认首页"
           class="flex-1"
           @change="handleDefaultRouterChange"
@@ -163,7 +164,8 @@
   }
 
   const isDefaultRouterAllowed = (routeName) => {
-    if (!routeName) return false
+    // 允许清空默认首页
+    if (!routeName) return true
     const checkedLeafMenus = menuTree.value
       ? menuTree.value.getCheckedNodes(false, true)
       : []

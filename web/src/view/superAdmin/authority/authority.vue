@@ -324,7 +324,8 @@
     authorityId: 0,
     authorityName: '',
     parentId: 0,
-    dataScope: 1
+    dataScope: 1,
+    defaultRouter: ''
   })
   const rules = ref({
     authorityId: [
@@ -504,7 +505,8 @@
       authorityId: 0,
       authorityName: '',
       parentId: 0,
-      dataScope: 1
+      dataScope: 1,
+      defaultRouter: ''
     }
   }
   // 关闭窗口

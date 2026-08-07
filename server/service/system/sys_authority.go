@@ -121,7 +121,13 @@ func (authorityService *AuthorityService) UpdateAuthority(ctx context.Context, a
 		logger.WithCtx(ctx).Mod("biz").Debug(err.Error())
 		return system.SysAuthority{}, errors.New("查询角色数据失败")
 	}
+	// Updates 处理 authority_name, parent_id 等非零值字段(原行为不变)
 	err = global.GVA_DB.WithContext(ctx).Model(&oldAuthority).Updates(&auth).Error
+	if err != nil {
+		return auth, err
+	}
+	// 单独更新 default_router, 使其支持清空(空字符串), Updates 会跳过零值字段
+	err = global.GVA_DB.WithContext(ctx).Model(&oldAuthority).Update("default_router", auth.DefaultRouter).Error
 	return auth, err
 }
 
